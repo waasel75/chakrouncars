@@ -186,7 +186,7 @@ const galleryState = {};
 function buildCarForm(car) {
   const isNew = !car;
   const id    = car ? car.id : 'new';
-  galleryState[id] = car?.gallery ? [...car.gallery] : [];
+  galleryState[id] = car?.gallery ? car.gallery.map(g => typeof g === 'string' ? {url:g, active:true} : g) : [];
   const cats  = Object.entries(CATEGORIES).map(([v,l]) =>
     `<option value="${v}" ${car?.category===v?'selected':''}>${l}</option>`).join('');
   const badgeOpts = BADGES_LIST.map(b =>
@@ -287,13 +287,21 @@ function handleFileUpload(id) {
 }
 
 function renderGalleryHtml(id) {
-  return (galleryState[id] || []).map((url, i) => `
-    <div class="s-gallery-item">
+  return (galleryState[id] || []).map((g, i) => {
+    const url = g.url || '';
+    const active = g.active !== false;
+    return `
+    <div class="s-gallery-item" style="opacity:${active?1:.5}">
       <div class="s-gallery-preview">${url ? `<img src="${url}" onerror="this.style.display='none'"/>` : '<span class="s-no-photo">—</span>'}</div>
-      <input class="s-input s-gallery-input" value="${url||''}" placeholder="URL photo intérieur" oninput="updateGalleryUrl('${id}',${i},this.value)"/>
+      <input class="s-input s-gallery-input" value="${url}" placeholder="URL photo intérieur" oninput="updateGalleryUrl('${id}',${i},this.value)"/>
       <label class="s-gallery-upload-btn">⬆️<input type="file" accept="image/*" onchange="handleGalleryFileUpload('${id}',${i},this)"/></label>
+      <label class="s-gallery-toggle" title="${active?'Désactiver':'Activer'}">
+        <input type="checkbox" ${active?'checked':''} onchange="toggleGalleryItem('${id}',${i},this.checked)" style="display:none"/>
+        <span style="cursor:pointer;font-size:1.1rem">${active?'👁':'🚫'}</span>
+      </label>
       <button class="s-gallery-remove" type="button" onclick="removeGalleryItem('${id}',${i})">✕</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function refreshGallery(id) {
   const c = document.getElementById('gallery_' + id);
@@ -304,7 +312,7 @@ function refreshGallery(id) {
 function addGalleryItem(id) {
   if (!galleryState[id]) galleryState[id] = [];
   if (galleryState[id].length >= 3) return;
-  galleryState[id].push('');
+  galleryState[id].push({url:'', active:true});
   refreshGallery(id);
 }
 function removeGalleryItem(id, idx) {
@@ -312,7 +320,12 @@ function removeGalleryItem(id, idx) {
   refreshGallery(id);
 }
 function updateGalleryUrl(id, idx, val) {
-  galleryState[id][idx] = val;
+  if (!galleryState[id][idx]) galleryState[id][idx] = {url:'', active:true};
+  galleryState[id][idx] = {...galleryState[id][idx], url: val};
+  refreshGallery(id);
+}
+function toggleGalleryItem(id, idx, checked) {
+  galleryState[id][idx] = {...galleryState[id][idx], active: checked};
   refreshGallery(id);
 }
 function handleGalleryFileUpload(id, idx, inputEl) {
@@ -320,7 +333,7 @@ function handleGalleryFileUpload(id, idx, inputEl) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    galleryState[id][idx] = e.target.result;
+    galleryState[id][idx] = {url: e.target.result, active: true};
     refreshGallery(id);
     showToast('✅ Photo intérieur chargée');
   };
@@ -335,7 +348,7 @@ function getFormData(id) {
   const emoji = document.getElementById('f_emoji_' + id)?.value.trim() || '🚗';
   const badge = document.getElementById('f_badge_' + id)?.value || null;
   const photo = document.getElementById('f_photo_' + id)?.value.trim() || '';
-  const gallery = (galleryState[id] || []).filter(Boolean);
+  const gallery = (galleryState[id] || []).filter(g => g && g.url);
   if (!name) { showToast('⚠️ Le nom est obligatoire'); return null; }
   return { name, model, category: cat, price, emoji, badgeKey: badge||null, photo, gallery, specsKey:['seats5','clim','gps'] };
 }
