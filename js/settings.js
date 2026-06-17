@@ -719,7 +719,7 @@ if (sessionStorage.getItem('md_settings') === '1') {
 }
 
 /* ===== BOOKING CONFIG ===== */
-let _bCities = [], _bAirports = [], _bHotels = [];
+var _bCities = [], _bAirports = [], _bHotels = [];
 
 function loadBookingConfig() {
   const cfg = JSON.parse(localStorage.getItem('md_booking_config') || '{}');
