@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>MarocDrive — Admin</title>
+  <link rel="stylesheet" href="css/admin.css"/>
+  <script src="js/auth.js"></script>
+  <script src="js/panel-lang.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🚗 Maroc<strong>Drive</strong> <span>Admin</span></div>
+    <h2>Connexion</h2>
+    <p class="login-desc">Accès réservé aux administrateurs</p>
+    <div class="form-group">
+      <label>Identifiant</label>
+      <input type="text" id="loginUser" placeholder="Votre identifiant" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <div class="pass-wrap">
+        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+        <button class="eye-btn" onclick="togglePass()">👁</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Se connecter →</button>
+    <p class="login-err" id="loginErr"></p>
+    <a href="#" class="login-forgot" onclick="event.preventDefault();openForgot()">Mot de passe oublié ?</a>
+  </div>
+
+  <div class="login-box" id="forgotBox" style="display:none">
+    <h2>🔑 Récupération</h2>
+    <div id="forgotStep1">
+      <p class="login-desc" id="forgotQuestionText"></p>
+      <div class="form-group">
+        <label>Votre réponse</label>
+        <input type="date" id="forgotAnswer"/>
+      </div>
+      <button class="btn-primary" onclick="checkForgotAnswer()">Vérifier →</button>
+    </div>
+    <div id="forgotStep2" style="display:none">
+      <div class="form-group">
+        <label>Nouvel identifiant</label>
+        <input type="text" id="forgotNewUser"/>
+      </div>
+      <div class="form-group">
+        <label>Nouveau mot de passe</label>
+        <input type="password" id="forgotNewPass"/>
+      </div>
+      <button class="btn-primary" onclick="submitForgotReset()">Réinitialiser →</button>
+    </div>
+    <p class="login-err" id="forgotErr"></p>
+    <a href="#" class="login-forgot" onclick="event.preventDefault();closeForgot()">← Retour</a>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div class="app" id="app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">🚗 Maroc<strong>Drive</strong></div>
+    <select id="panelLangSel" onchange="applyPanelLang(this.value)" style="width:calc(100% - 20px);margin:0 10px 10px;background:#1a1d24;color:#fff;border:1px solid #333;border-radius:6px;padding:6px">
+      <option value="fr">🇫🇷 Français</option><option value="en">🇬🇧 English</option>
+      <option value="es">🇪🇸 Español</option><option value="ar">🇲🇦 العربية</option>
+    </select>
+    <nav class="sb-nav">
+      <button class="sb-link active" onclick="showTab('dashboard',this)"><span class="sb-icon">🏠</span><span class="sb-txt" data-pt="nav-dash">Dashboard</span></button>
+      <button class="sb-link" onclick="showTab('reservations',this)"><span class="sb-icon">📋</span><span class="sb-txt" data-pt="nav-res">Réservations</span></button>
+      <button class="sb-link" onclick="showTab('stats',this)"><span class="sb-icon">📊</span><span class="sb-txt" data-pt="nav-stats">Statistiques</span></button>
+      <button class="sb-link" onclick="showTab('chats',this)"><span class="sb-icon">💬</span><span class="sb-txt" data-pt="nav-chats">Conversations</span><span class="chat-badge-dot" id="chatBadgeDot" style="display:none"></span></button>
+    </nav>
+    <div class="sb-chatbot-toggle" id="sbChatToggle">
+      <span class="sb-icon">🤖</span>
+      <span class="sb-txt sb-chatbot-label" id="chatToggleLabel" data-pt="chatbot-label">Chatbot</span>
+      <div id="chatToggleTrack" onclick="toggleChatbot()" class="sb-toggle-track">
+        <div id="chatToggleThumb" class="sb-toggle-thumb"></div>
+      </div>
+    </div>
+    <div class="sb-footer">
+      <a href="index.html" target="_blank" class="sb-link"><span class="sb-icon">🌐</span><span class="sb-txt" data-pt="view-site">Voir le site</span></a>
+      <a href="settings.html" class="sb-link"><span class="sb-icon">⚙️</span><span class="sb-txt" data-pt="settings">Paramètres</span></a>
+      <button class="sb-link" onclick="doLogout()"><span class="sb-icon">🚪</span><span class="sb-txt" data-pt="logout">Déconnexion</span></button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <h1 id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="notif-badge" id="notifBadge" style="display:none"></div>
+        <span class="admin-chip">👤 Admin</span>
+      </div>
+    </header>
+
+    <!-- ===== TAB: DASHBOARD ===== -->
+    <div id="tabDashboard" class="tab-content">
+
+      <!-- KPI -->
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <!-- Row: recent + quick actions -->
+      <div class="dash-row">
+        <div class="dash-panel" style="flex:2">
+          <div class="panel-header">
+            <h3>Dernières réservations</h3>
+            <button class="btn-sm" onclick="showTab('reservations',document.querySelectorAll('.sb-link')[1])">Voir tout →</button>
+          </div>
+          <div id="recentList"></div>
+        </div>
+        <div class="dash-panel" style="flex:1">
+          <div class="panel-header"><h3>En attente</h3></div>
+          <div id="pendingList"></div>
+        </div>
+      </div>
+
+      <!-- Status overview -->
+      <div class="dash-panel">
+        <div class="panel-header"><h3>Répartition des statuts</h3></div>
+        <div class="status-bars" id="statusBars"></div>
+      </div>
+
+    </div>
+
+    <!-- ===== TAB: RESERVATIONS ===== -->
+    <div id="tabReservations" class="tab-content" style="display:none">
+
+      <div class="filters">
+        <input type="text" id="searchInput" placeholder="🔍 Rechercher nom, voiture, ville, tél..." oninput="renderTable()"/>
+        <select id="filterStatus" onchange="renderTable()">
+          <option value="">Tous les statuts</option>
+          <option value="pending">En attente</option>
+          <option value="confirmed">Confirmé</option>
+          <option value="completed">Terminé</option>
+          <option value="cancelled">Annulé</option>
+        </select>
+        <button class="btn-sm" onclick="openExportModal()">⬇️ Export Excel</button>
+        <button class="btn-sm danger" onclick="clearAll()">🗑️ Vider</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Client</th><th>Véhicule</th><th>Lieu</th>
+            <th>Dates</th><th>Durée</th><th>Total</th><th>Statut</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="resBody"></tbody>
+        </table>
+        <div class="empty-state" id="emptyState" style="display:none">
+          <span>📭</span><p>Aucune réservation</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== TAB: STATS ===== -->
+    <div id="tabStats" class="tab-content" style="display:none">
+
+      <div class="kpi-grid" id="statsKpi"></div>
+
+      <div class="dash-row">
+        <div class="dash-panel" style="flex:1">
+          <div class="panel-header"><h3>📊 Statuts</h3></div>
+          <div id="statusChart"></div>
+        </div>
+        <div class="dash-panel" style="flex:1">
+          <div class="panel-header"><h3>🚗 Top véhicules</h3></div>
+          <div id="topCars"></div>
+        </div>
+        <div class="dash-panel" style="flex:1">
+          <div class="panel-header"><h3>📍 Top destinations</h3></div>
+          <div id="topCities"></div>
+        </div>
+      </div>
+
+      <div class="dash-panel">
+        <div class="panel-header"><h3>💰 Revenus par réservation</h3></div>
+        <div id="revenueChart" class="revenue-chart"></div>
+      </div>
+
+    </div>
+
+    <!-- ===== TAB: CHATS ===== -->
+    <div id="tabChats" class="tab-content" style="display:none">
+      <div class="panel-header" style="margin-bottom:16px">
+        <h3 style="font-size:1.1rem;font-weight:700;">💬 Conversations Chatbot</h3>
+        <button class="btn-sm danger" onclick="clearChats()">🗑 Vider</button>
+      </div>
+      <div class="chat-split">
+        <div class="chat-list-col" id="chatList"></div>
+        <div class="chat-detail-col" id="chatDetail"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===== DETAIL MODAL ===== -->
+<div class="overlay" id="detailOverlay" onclick="closeDetail(event)">
+  <div class="modal" id="detailModal"></div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="exportOverlay" onclick="if(event.target===this)closeExportModal()" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;">
+  <div style="background:#161616;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:32px;width:420px;max-width:95vw;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 style="font-size:1.1rem;font-weight:700;">📊 Export Excel</h3>
+      <button onclick="closeExportModal()" style="background:none;border:none;color:#888;font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <p style="color:#888;font-size:0.83rem;margin-bottom:18px;">Choisissez la période à exporter. Le fichier contiendra plusieurs feuilles avec statistiques détaillées.</p>
+    <div id="exportPeriods" style="display:flex;flex-direction:column;gap:10px;">
+      <label class="exp-opt"><input type="radio" name="expPeriod" value="week" checked/><span>📅 Cette semaine</span></label>
+      <label class="exp-opt"><input type="radio" name="expPeriod" value="month"/><span>🗓️ Ce mois (30 jours)</span></label>
+      <label class="exp-opt"><input type="radio" name="expPeriod" value="3months"/><span>📆 3 derniers mois</span></label>
+      <label class="exp-opt"><input type="radio" name="expPeriod" value="6months"/><span>📆 6 derniers mois</span></label>
+      <label class="exp-opt"><input type="radio" name="expPeriod" value="year"/><span>📅 Cette année (12 mois)</span></label>
+      <label class="exp-opt"><input type="radio" name="expPeriod" value="all"/><span>🗂️ Toutes les données</span></label>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:22px;">
+      <button onclick="doExport()" style="flex:1;padding:12px;background:#e63329;color:#fff;border:none;border-radius:9px;font-weight:700;font-size:0.9rem;cursor:pointer;font-family:inherit;">⬇️ Télécharger Excel</button>
+      <button onclick="closeExportModal()" style="padding:12px 18px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;border-radius:9px;cursor:pointer;font-family:inherit;">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/db.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ===== SEO PRIMARY ===== -->
+  <title>MarocDrive — Location de Voitures au Maroc | Casablanca, Marrakech, Agadir</title>
+  <meta name="description" content="Louez une voiture au Maroc au meilleur prix. Large choix de véhicules à Casablanca, Marrakech, Agadir, Fès, Tanger. Livraison gratuite, assurance complète, réservation en ligne." />
+  <meta name="keywords" content="location voiture maroc, car rental morocco, louer voiture casablanca, louer voiture marrakech, louer voiture agadir, location auto maroc, تأجير سيارات المغرب" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="MarocDrive" />
+  <link rel="canonical" href="https://www.marocdrive.ma/" />
+
+  <!-- ===== OPEN GRAPH (Facebook, WhatsApp, LinkedIn) ===== -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://www.marocdrive.ma/" />
+  <meta property="og:title"       content="MarocDrive — Location de Voitures au Maroc" />
+  <meta property="og:description" content="Louez une voiture au Maroc au meilleur prix. Casablanca, Marrakech, Agadir, Fès. Livraison gratuite, assurance incluse." />
+  <meta property="og:image"       content="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&q=80" />
+  <meta property="og:locale"      content="fr_MA" />
+  <meta property="og:site_name"   content="MarocDrive" />
+
+  <!-- ===== TWITTER CARD ===== -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="MarocDrive — Location de Voitures au Maroc" />
+  <meta name="twitter:description" content="Louez une voiture au Maroc au meilleur prix. Casablanca, Marrakech, Agadir, Fès." />
+  <meta name="twitter:image"       content="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&q=80" />
+
+  <!-- ===== SCHEMA.ORG — LocalBusiness + CarRental ===== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AutoRental",
+    "name": "MarocDrive",
+    "description": "Location de voitures au Maroc — Casablanca, Marrakech, Agadir, Fès, Tanger",
+    "url": "https://www.marocdrive.ma",
+    "telephone": "+212634829085",
+    "priceRange": "$$",
+    "currenciesAccepted": "MAD",
+    "paymentAccepted": "Cash, Credit Card",
+    "areaServed": {
+      "@type": "Country",
+      "name": "Maroc"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "MA",
+      "addressLocality": "Casablanca"
+    },
+    "sameAs": [
+      "https://wa.me/212634829085"
+    ]
+  }
+  </script>
+
+  <!-- ===== PERFORMANCE ===== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://images.unsplash.com" />
+  <link rel="dns-prefetch" href="https://wa.me" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="logo">
+        <span class="logo-icon" id="logoIconHeader">🚗</span>
+        <span class="logo-text" id="logoTextHeader">Maroc<strong>Drive</strong></span>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#fleet"  class="nav-link" data-t="nav-fleet">Notre Flotte</a></li>
+        <li><a href="#how"    class="nav-link" data-t="nav-how">Comment ça marche</a></li>
+        <li><a href="#about"  class="nav-link" data-t="nav-about">À propos</a></li>
+        <li><a href="#contact"class="nav-link" data-t="nav-contact">Contact</a></li>
+        <li><a href="#booking" class="btn btn-nav" data-t="nav-book">Réserver</a></li>
+      </ul>
+
+      <div class="nav-right">
+        <!-- Language Switcher -->
+        <div class="lang-switcher" id="langSwitcher">
+          <button class="lang-btn" id="langBtn" aria-label="Changer de langue">
+            <svg class="lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <span class="lang-current-flag">🇫🇷</span>
+            <span class="lang-current-label">Français</span>
+            <svg class="lang-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+
+          <div class="lang-dropdown" id="langDropdown">
+            <div class="lang-dropdown-inner">
+              <button class="lang-option active" data-lang="fr">
+                <span class="lo-flag">🇫🇷</span>
+                <span class="lo-name">Français</span>
+                <span class="lo-check">✓</span>
+              </button>
+              <button class="lang-option" data-lang="en">
+                <span class="lo-flag">🇬🇧</span>
+                <span class="lo-name">English</span>
+                <span class="lo-check">✓</span>
+              </button>
+              <button class="lang-option" data-lang="es">
+                <span class="lo-flag">🇪🇸</span>
+                <span class="lo-name">Español</span>
+                <span class="lo-check">✓</span>
+              </button>
+              <button class="lang-option" data-lang="ar">
+                <span class="lo-flag">🇲🇦</span>
+                <span class="lo-name">العربية</span>
+                <span class="lo-check">✓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="home">
+
+    <!-- BG photo + Ken Burns -->
+    <div class="hero-photo-bg" id="heroBg"></div>
+    <div class="hero-photo-overlay"></div>
+
+    <div class="container hero-inner">
+
+      <!-- LEFT: text + search -->
+      <div class="hero-left">
+        <div class="hero-badge animate-fade-up" data-delay="0">
+          <span>✦</span> <span data-t="hero-badge">Location de voitures — Maroc</span>
+        </div>
+        <h1 class="hero-title animate-fade-up" data-delay="100">
+          <span data-t="hero-title1">Voyagez libre,</span><br />
+          <span class="gradient-text" data-t="hero-title2">partout au Maroc</span>
+        </h1>
+        <p class="hero-sub animate-fade-up" data-delay="200" data-t="hero-sub">
+          Flotte moderne, prix transparents, livraison à votre hôtel.<br>
+          Casablanca · Marrakech · Agadir · Fès · Tanger
+        </p>
+
+      <!-- Booking Methods -->
+      <div class="booking-methods animate-fade-up" data-delay="280" id="booking">
+        <button class="bm-btn active" onclick="switchBooking('online',this)">
+          <span class="bm-icon">🖥️</span>
+          <span class="bm-label">Réservation en ligne</span>
+        </button>
+        <button class="bm-btn" onclick="switchBooking('call',this)">
+          <span class="bm-icon">📞</span>
+          <span class="bm-label">Appel téléphonique</span>
+        </button>
+        <button class="bm-btn" onclick="switchBooking('whatsapp',this)">
+          <span class="bm-icon">💬</span>
+          <span class="bm-label">WhatsApp</span>
+        </button>
+      </div>
+
+      <!-- Online Form -->
+      <div class="search-bar animate-fade-up" data-delay="300" id="bookingOnline">
+        <div class="search-field">
+          <label data-t="pickup-label">📍 Lieu de prise en charge</label>
+          <select data-t="pickup-select">
+            <option value="">Choisir un lieu</option>
+            <optgroup label="🏙️ Villes">
+              <option>Tétouan</option>
+              <option>Martil</option>
+              <option>M'Diq</option>
+              <option>Fnideq</option>
+              <option>Tanger</option>
+              <option>Chefchaouen</option>
+              <option>Rabat</option>
+              <option>Casablanca</option>
+              <option>Marrakech</option>
+            </optgroup>
+            <optgroup label="✈️ Aéroports">
+              <option>✈️ Aéroport Tanger Ibn Batouta</option>
+              <option>✈️ Aéroport Casablanca CMN</option>
+              <option>✈️ Aéroport Marrakech RAK</option>
+            </optgroup>
+            <optgroup label="🏨 Hôtels">
+              <option>🏨 Hôtel / Riad (préciser à la réservation)</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="search-field">
+          <label data-t="date-start-label">📅 Date de début</label>
+          <input type="date" id="startDate" />
+        </div>
+        <div class="search-field">
+          <label data-t="date-end-label">📅 Date de fin</label>
+          <input type="date" id="endDate" />
+        </div>
+        <button class="btn btn-primary search-btn" data-t="search-btn" onclick="handleSearch()">
+          Rechercher <span class="btn-arrow">→</span>
+        </button>
+      </div>
+
+      <!-- Call Panel -->
+      <div class="contact-panel" id="bookingCall" style="display:none">
+        <div class="cp-icon">📞</div>
+        <h3>Appelez-nous directement</h3>
+        <p>Notre équipe est disponible 7j/7 de 8h à 22h</p>
+        <a href="tel:+212634829085" class="cp-btn cp-call" id="cpCallBtn">+212 634 829 085</a>
+        <span class="cp-note">Appel gratuit depuis le Maroc</span>
+      </div>
+
+      <!-- WhatsApp Panel -->
+      <div class="contact-panel" id="bookingWA" style="display:none">
+        <div class="cp-icon">💬</div>
+        <h3>Écrivez-nous sur WhatsApp</h3>
+        <p>Réponse garantie en moins de 15 minutes</p>
+        <a href="https://wa.me/212634829085?text=Bonjour%2C%20je%20voudrais%20réserver%20une%20voiture." target="_blank" class="cp-btn cp-wa" id="cpWaBtn">Ouvrir WhatsApp</a>
+        <span class="cp-note">Disponible 24h/24</span>
+      </div>
+
+      </div><!-- /hero-left -->
+
+      <!-- RIGHT: car image -->
+      <div class="hero-right animate-fade-up" data-delay="200">
+        <div class="hero-car-wrap">
+          <div class="hero-car-glow"></div>
+          <img class="hero-car-img" id="heroCarImg"
+            src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=900&q=80&auto=format&fit=crop"
+            alt="Voiture de location au Maroc — MarocDrive"
+            width="900" height="600" fetchpriority="high"
+            onerror="this.src='https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=900&q=80'" />
+          <div class="hero-car-badge-float">
+            <span>⭐ 4.9</span> · +500 véhicules
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /hero-inner -->
+
+    <div class="hero-scroll-hint">
+      <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+    </div>
+  </section>
+
+  <!-- ===== CITIES ===== -->
+  <section class="cities-section" id="cities">
+    <div class="container">
+      <div class="section-header" data-aos>
+        <span class="section-badge">Nos Destinations</span>
+        <h2>Disponible partout au Maroc</h2>
+        <p>Livraison gratuite dans les aéroports et centres-villes.</p>
+      </div>
+    </div>
+    <div class="ticker-wrap">
+      <div class="ticker-track" id="tickerTrack"></div>
+    </div>
+    <div class="ticker-wrap ticker-wrap-rev">
+      <div class="ticker-track ticker-track-rev" id="tickerTrack2"></div>
+    </div>
+  </section>
+
+  <!-- ===== OFFERS BANNER ===== -->
+  <div id="offersBanner" style="display:none"></div>
+
+  <!-- ===== FLEET ===== -->
+  <section class="fleet-section" id="fleet" aria-label="Notre flotte de véhicules">
+    <div class="container">
+      <div class="section-header" data-aos>
+        <span class="section-badge" data-t="fleet-badge">Notre Flotte</span>
+        <h2 data-t="fleet-title">Choisissez votre véhicule</h2>
+        <p data-t="fleet-sub">Des citadines économiques aux SUV premium, nous avons le véhicule qu'il vous faut.</p>
+      </div>
+      <div class="fleet-filters" data-aos>
+        <button class="filter-btn active">Tous</button>
+        <button class="filter-btn">Économique</button>
+        <button class="filter-btn">SUV</button>
+        <button class="filter-btn">Premium</button>
+        <button class="filter-btn">Électrique</button>
+      </div>
+      <div class="cars-grid" id="carsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="how-section" id="how">
+    <div class="container">
+      <div class="section-header" data-aos>
+        <span class="section-badge" data-t="how-badge">Simple & Rapide</span>
+        <h2 data-t="how-title">Comment ça marche ?</h2>
+        <p data-t="how-sub">Réserver votre voiture en 3 étapes simples.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card" data-aos>
+          <div class="step-num">01</div>
+          <div class="step-icon">🔍</div>
+          <h3>Choisissez</h3>
+          <p>Sélectionnez votre ville, vos dates et le véhicule qui correspond à vos besoins.</p>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-card" data-aos>
+          <div class="step-num">02</div>
+          <div class="step-icon">📋</div>
+          <h3>Réservez</h3>
+          <p>Remplissez le formulaire en ligne — simple et sécurisé. Confirmation immédiate.</p>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-card" data-aos>
+          <div class="step-num">03</div>
+          <div class="step-icon">🗝️</div>
+          <h3>Profitez</h3>
+          <p>Nous livrons votre voiture où vous êtes. Prenez la route et explorez le Maroc !</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TESTIMONIALS ===== -->
+  <section class="testimonials-section" id="testimonials">
+    <div class="container">
+      <div class="section-header" data-aos>
+        <span class="section-badge" data-t="t-badge">Avis Clients</span>
+        <h2 data-t="t-title">Ce que disent nos clients</h2>
+      </div>
+      <div class="testimonials-track-wrapper">
+        <div class="testimonials-track" id="testimonialsTrack"></div>
+      </div>
+      <div class="testimonials-dots" id="testimonialsDots"></div>
+    </div>
+  </section>
+
+  <!-- ===== STATS + FEATURES ===== -->
+  <section class="sf-section">
+    <div class="container">
+      <div class="stats-row">
+        <div class="stat-box" data-aos><span class="stat-num" data-target="500">0</span><span class="stat-plus">+</span><span class="stat-label">Véhicules</span></div>
+        <div class="stat-box" data-aos><span class="stat-num" data-target="15">0</span><span class="stat-plus">+</span><span class="stat-label">Villes</span></div>
+        <div class="stat-box" data-aos><span class="stat-num" data-target="10000">0</span><span class="stat-plus">+</span><span class="stat-label">Clients satisfaits</span></div>
+        <div class="stat-box" data-aos><span class="stat-num" data-target="8">0</span><span class="stat-label">Ans d'expérience</span></div>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card" data-aos><div class="feature-icon">🛡️</div><h3>Assurance complète</h3><p>Tous nos véhicules sont couverts par une assurance tous risques incluse dans le prix.</p></div>
+        <div class="feature-card" data-aos><div class="feature-icon">🚀</div><h3>Livraison gratuite</h3><p>Nous livrons votre voiture à l'aéroport ou à votre hôtel sans frais supplémentaires.</p></div>
+        <div class="feature-card" data-aos><div class="feature-icon">💳</div><h3>Paiement flexible</h3><p>Payez en ligne ou en espèces. Annulation gratuite 48h avant la prise en charge.</p></div>
+        <div class="feature-card" data-aos><div class="feature-icon">📞</div><h3>Support 24/7</h3><p>Notre équipe est disponible 24h/24 en français, arabe et anglais.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ABOUT ===== -->
+  <section class="about-section" id="about" aria-label="À propos de MarocDrive">
+    <div class="container about-grid">
+      <div class="about-visual" data-aos>
+        <div class="about-card-big" id="aboutCardBig">
+          <div class="about-img-placeholder" id="aboutImgPlaceholder">
+            <span>🚗</span>
+            <p>Depuis 2016</p>
+          </div>
+        </div>
+        <div class="about-badge-float">
+          <strong>⭐ 4.9</strong>
+          <span>Note moyenne</span>
+        </div>
+      </div>
+      <div class="about-text" data-aos>
+        <span class="section-badge" data-t="about-badge">À propos de nous</span>
+        <h2 data-t="about-title">Leader de la location de voitures au Maroc</h2>
+        <p data-t="about-p1">Depuis 2016, MarocDrive accompagne les voyageurs et les professionnels dans leurs déplacements au Maroc. Notre flotte de plus de 500 véhicules couvre toutes les grandes villes du royaume.</p>
+        <p data-t="about-p2">Notre mission : vous offrir une expérience de location sans stress, transparente et mémorable.</p>
+        <ul class="about-list" data-t="about-list">
+          <li>✅ Prix toujours affichés, sans frais cachés</li>
+          <li>✅ Véhicules récents &lt; 3 ans</li>
+          <li>✅ Kilomètres illimités inclus</li>
+          <li>✅ Assistance routière 24/7</li>
+        </ul>
+        <a href="#booking" class="btn btn-primary" data-t="about-cta">Réserver maintenant</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT ===== -->
+  <section class="contact-section" id="contact" aria-label="Contactez MarocDrive">
+    <div class="container contact-grid">
+      <div class="contact-info" data-aos>
+        <span class="section-badge" data-t="contact-badge">Contactez-nous</span>
+        <h2 data-t="contact-title">Nous sommes là pour vous</h2>
+        <div class="contact-item">
+          <span class="contact-icon">📞</span>
+          <div><strong>Téléphone / WhatsApp</strong><p id="contactPhoneText">+212 6XX XXX XXX</p></div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">✉️</span>
+          <div><strong>Email</strong><p id="contactEmailText">contact@marocdrive.ma</p></div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">📍</span>
+          <div><strong>Adresse</strong><p id="contactAddrText">Casablanca, Maroc</p></div>
+        </div>
+        <div class="social-links">
+          <a href="#" class="social-btn" id="socialFb" target="_blank" style="display:none"></a>
+          <a href="#" class="social-btn" id="socialIg" target="_blank" style="display:none"></a>
+          <a href="#" class="social-btn" id="socialTt" target="_blank" style="display:none"></a>
+        </div>
+      </div>
+      <div id="mapsSection" style="display:none;margin-top:20px">
+        <iframe id="mapsFrame" width="100%" height="280" style="border:0;border-radius:14px" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <span class="logo-icon" id="logoIconFooter">🚗</span>
+          <span class="logo-text" id="logoTextFooter">Maroc<strong>Drive</strong></span>
+        </a>
+        <p data-t="footer-desc">La référence de la location de voitures au Maroc depuis 2016.</p>
+      </div>
+      <div class="footer-col">
+        <h4 data-t="footer-nav-h">Navigation</h4>
+        <ul data-t="footer-nav-links">
+          <li><a href="#fleet">Notre Flotte</a></li>
+          <li><a href="#how">Comment ça marche</a></li>
+          <li><a href="#about">À propos</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 data-t="footer-cities-h">Villes</h4>
+        <ul data-t="footer-city-links">
+          <li><a href="#">Casablanca</a></li>
+          <li><a href="#">Marrakech</a></li>
+          <li><a href="#">Agadir</a></li>
+          <li><a href="#">Fès</a></li>
+          <li><a href="#">Tanger</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 data-t="footer-legal-h">Légal</h4>
+        <ul data-t="footer-legal-links">
+          <li><a href="#">Conditions générales</a></li>
+          <li><a href="#">Politique de confidentialité</a></li>
+          <li><a href="#">Mentions légales</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p data-t="footer-copy">© 2026 MarocDrive. Tous droits réservés.</p>
+    </div>
+  </footer>
+
+  <!-- ===== BOOKING MODAL ===== -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" id="bookingModal">
+      <button class="modal-close" onclick="closeBookingModal()">✕</button>
+
+      <div class="modal-header">
+        <div class="modal-car-info" id="modalCarInfo">
+          <span class="modal-car-emoji" id="modalCarEmoji">🚗</span>
+          <div>
+            <div class="modal-car-name" id="modalCarName">Dacia Logan</div>
+            <div class="modal-car-price-day"><span id="modalCarPriceDay">250</span> MAD / jour</div>
+          </div>
+        </div>
+        <div class="modal-step-indicator">
+          <span class="msi active" id="msi1">1</span>
+          <span class="msi-line"></span>
+          <span class="msi" id="msi2">2</span>
+          <span class="msi-line"></span>
+          <span class="msi" id="msi3">✓</span>
+        </div>
+      </div>
+
+      <!-- Step 1: Dates + City -->
+      <div class="modal-step" id="mStep1">
+        <h3 class="modal-step-title">Détails de la location</h3>
+        <div class="mform-row">
+          <div class="mform-group">
+            <label>📅 Date de début <span class="req">*</span></label>
+            <input type="date" id="mStartDate" oninput="calcTotal()" />
+          </div>
+          <div class="mform-group">
+            <label>📅 Date de fin <span class="req">*</span></label>
+            <input type="date" id="mEndDate" oninput="calcTotal()" />
+          </div>
+        </div>
+        <div class="mform-group">
+          <label>📍 Ville de prise en charge <span class="req">*</span></label>
+          <select id="mCity">
+            <option value="">Choisir un lieu</option>
+            <optgroup label="🏙️ Villes">
+              <option>Tétouan</option>
+              <option>Martil</option>
+              <option>M'Diq</option>
+              <option>Fnideq</option>
+              <option>Tanger</option>
+              <option>Chefchaouen</option>
+              <option>Rabat</option>
+              <option>Casablanca</option>
+              <option>Marrakech</option>
+            </optgroup>
+            <optgroup label="✈️ Aéroports">
+              <option>✈️ Aéroport Tanger Ibn Batouta</option>
+              <option>✈️ Aéroport Casablanca CMN</option>
+              <option>✈️ Aéroport Marrakech RAK</option>
+            </optgroup>
+            <optgroup label="🏨 Hôtels">
+              <option>🏨 Hôtel / Riad (préciser à la réservation)</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="total-preview" id="totalPreview" style="display:none">
+          <div class="total-row"><span>Durée</span><span id="totalDays">— jours</span></div>
+          <div class="total-row"><span>Prix / jour</span><span id="totalPerDay">— MAD</span></div>
+          <div class="total-row total-main"><span>Total</span><span id="totalAmount">— MAD</span></div>
+        </div>
+        <button class="btn btn-primary w-full" onclick="goStep(2)">Continuer →</button>
+      </div>
+
+      <!-- Step 2: Personal Info -->
+      <div class="modal-step" id="mStep2" style="display:none">
+        <h3 class="modal-step-title">Vos informations</h3>
+        <div class="mform-group">
+          <label>👤 Nom complet <span class="req">*</span></label>
+          <input type="text" id="mName" placeholder="Mohammed Alami" />
+        </div>
+        <div class="mform-group">
+          <label>📞 Numéro de téléphone <span class="req">*</span></label>
+          <input type="tel" id="mPhone" placeholder="+212 6XX XXX XXX" />
+        </div>
+        <div class="mform-group">
+          <label>✉️ Email <span class="opt">(optionnel)</span></label>
+          <input type="email" id="mEmail" placeholder="vous@example.com" />
+        </div>
+        <div class="modal-nav">
+          <button class="btn btn-outline" onclick="goStep(1)">← Retour</button>
+          <button class="btn btn-primary" onclick="goStep(3)">Confirmer →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Confirmation -->
+      <div class="modal-step" id="mStep3" style="display:none">
+        <div class="confirm-icon">✅</div>
+        <h3 class="modal-step-title" style="text-align:center">Réservation confirmée !</h3>
+        <div class="confirm-summary" id="confirmSummary"></div>
+        <p class="confirm-note">Notre équipe vous contactera dans les <strong>30 minutes</strong> pour finaliser votre réservation.</p>
+        <button class="btn btn-primary w-full" onclick="closeBookingModal()">Parfait, merci !</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WhatsApp -->
+  <a href="https://wa.me/212634829085" class="whatsapp-btn" id="waFloatBtn" target="_blank" aria-label="WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <!-- ===== AVAILABILITY CALENDAR ===== -->
+  <div class="cal-overlay" id="calOverlay" onclick="if(event.target===this)closeCal()">
+    <div class="cal-modal">
+      <div class="cal-header">
+        <span class="cal-car-name" id="calCarName"></span>
+        <button class="cal-close" onclick="closeCal()">✕</button>
+      </div>
+      <div class="cal-legend">
+        <span class="leg-item"><span class="leg-dot leg-avail"></span> Disponible</span>
+        <span class="leg-item"><span class="leg-dot leg-busy"></span> Réservé</span>
+        <span class="leg-item"><span class="leg-dot leg-today"></span> Aujourd'hui</span>
+      </div>
+      <div class="cal-nav">
+        <button onclick="calNav(-1)">‹</button>
+        <span id="calMonthLabel"></span>
+        <button onclick="calNav(1)">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  </div>
+
+  <script src="js/db.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/chatbot.js"></script>
+</body>
+</html>
