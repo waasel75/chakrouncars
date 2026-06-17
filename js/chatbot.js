@@ -378,34 +378,10 @@ function respond(intent, tx) {
   });
 }
 
-/* ── MAIN ENTRY — GPT via Netlify Function ── */
-let chatHistory = [];
-
-async function buildResponse(text) {
-  chatHistory.push({ role: 'user', content: text });
-  if (chatHistory.length > 10) chatHistory = chatHistory.slice(-10);
-
-  const cars = liveCars().map(c => `${c.name} ${c.price}MAD/j`).join(', ');
-  const offers = liveOffers().map(o => `-${o.discount}% ${o.title}`).join(', ') || 'aucune';
-
-  try {
-    const resp = await fetch('/.netlify/functions/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: chatHistory, ctx: { cars, offers } }),
-    });
-    if (!resp.ok) throw new Error('api_error');
-    const data = await resp.json();
-    if (!data.reply) throw new Error('empty_reply');
-    chatHistory.push({ role: 'assistant', content: data.reply });
-    return data.reply;
-  } catch {
-    // fallback local
-    chatHistory.pop(); // remove user msg added above, local bot doesn't need history
-    chatLang = detectLang(text);
-    const intent = getIntent(text);
-    return respond(intent, text);
-  }
+/* ── MAIN ENTRY ── */
+function buildResponse(text) {
+  chatLang = detectLang(text);
+  return respond(getIntent(text), text);
 }
 
 /* ── UI ── */
@@ -476,27 +452,13 @@ function addMsg(content, role) {
 }
 function addBotMsg(text) { addMsg(text, 'bot'); }
 
-async function sendChat() {
+function sendChat() {
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if (!text) return;
   input.value = '';
-  input.disabled = true;
   addMsg(text, 'user');
-  const msgs = document.getElementById('chatMessages');
-  const typing = document.createElement('div');
-  typing.className = 'chat-msg bot chat-typing';
-  typing.innerHTML = '<div class="chat-bubble"><span></span><span></span><span></span></div>';
-  msgs.appendChild(typing); msgs.scrollTop = msgs.scrollHeight;
-  try {
-    const reply = await buildResponse(text);
-    msgs.removeChild(typing);
-    addBotMsg(reply);
-  } catch {
-    msgs.removeChild(typing);
-    addBotMsg('Désolé, une erreur est survenue. Contactez-nous sur WhatsApp 📱');
-  }
-  input.disabled = false;
+  addBotMsg(buildResponse(text));
   input.focus();
 }
 
