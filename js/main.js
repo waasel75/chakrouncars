@@ -60,7 +60,7 @@ function applyBranding(cfg) {
   ['Header','Footer'].forEach(pos => {
     const icon = document.getElementById('logoIcon'+pos);
     const text = document.getElementById('logoText'+pos);
-    if (icon) icon.innerHTML = isImg ? `<img src="${cfg.logo}" style="width:28px;height:28px;object-fit:contain;border-radius:6px;vertical-align:middle;"/>` : (cfg.logo || '🚗');
+    if (icon) icon.innerHTML = isImg ? `<img src="${cfg.logo}" style="max-height:40px;max-width:160px;width:auto;height:auto;object-fit:contain;vertical-align:middle;display:block;"/>` : (cfg.logo || '🚗');
     if (text) text.innerHTML = textHtml;
   });
 }
@@ -727,7 +727,11 @@ function renderCars(filter) {
     card.innerHTML = `
       <div class="car-img" ${totalPhotos > 1 ? `onclick="openPhotoModal('${car.name.replace(/'/g,"\\'")}')" style="cursor:pointer"` : ''}>
         ${photo ? `<img src="${photo}" alt="${car.name}" style="width:100%;height:100%;object-fit:cover;border-radius:12px 12px 0 0;" onerror="this.outerHTML='<span>${car.emoji}</span>'"/>` : `<span>${car.emoji}</span>`}
-        ${!available ? `<span class="car-badge avail-badge">❌ Non disponible</span>` : badgeText ? `<span class="car-badge">${badgeText}</span>` : ''}
+        ${!available
+          ? `<span class="car-badge avail-badge">❌ Non disponible</span>`
+          : offer
+            ? `<div class="promo-ribbon">-${offer.discount}%<span>${discountedPrice} MAD</span></div>`
+            : car.badgeKey ? `<span class="car-badge">${badges[car.badgeKey]}</span>` : ''}
         ${totalPhotos > 1 ? `<span class="car-photo-count">📷 ${totalPhotos}</span>` : ''}
       </div>
       <div class="car-body">
