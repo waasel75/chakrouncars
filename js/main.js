@@ -821,6 +821,20 @@ document.querySelectorAll('.filter-btn').forEach((btn, i) => {
 /* ===== BOOKING MODAL ===== */
 let activeCarData = null;
 
+let _fpStart = null, _fpEnd = null;
+
+function getDisabledRanges(carName) {
+  const reservations = JSON.parse(localStorage.getItem('md_reservations') || '[]');
+  const blocks = JSON.parse(localStorage.getItem('md_blocks') || '{}')[carName] || [];
+  const ranges = [];
+  reservations.forEach(r => {
+    if (r.car === carName && r.status !== 'cancelled')
+      ranges.push({ from: r.start, to: r.end });
+  });
+  blocks.forEach(b => ranges.push({ from: b.start, to: b.end }));
+  return ranges;
+}
+
 function bookCar(name) {
   const car = CARS_DATA.find(c => c.name === name);
   if (!car) return;
@@ -830,16 +844,35 @@ function bookCar(name) {
   document.getElementById('modalCarName').textContent     = car.name;
   document.getElementById('modalCarPriceDay').textContent = car.price;
 
-  // prefill dates from hero search bar if set
-  const s = document.getElementById('startDate')?.value;
-  const e = document.getElementById('endDate')?.value;
-  const ms = document.getElementById('mStartDate');
-  const me = document.getElementById('mEndDate');
   const today = new Date().toISOString().split('T')[0];
-  ms.min = today;
-  me.min = today;
-  if (s) ms.value = s;
-  if (e) me.value = e;
+  const heroS = document.getElementById('startDate')?.value;
+  const heroE = document.getElementById('endDate')?.value;
+  const disabled = getDisabledRanges(car.name);
+
+  // destroy previous instances
+  if (_fpStart) { _fpStart.destroy(); _fpStart = null; }
+  if (_fpEnd)   { _fpEnd.destroy();   _fpEnd = null; }
+
+  const fpOpts = {
+    minDate: today,
+    disable: disabled,
+    locale: { firstDayOfWeek: 1 },
+    dateFormat: 'Y-m-d',
+    disableMobile: false,
+    onChange(dates, dateStr) { calcTotal(); }
+  };
+
+  _fpStart = flatpickr('#mStartDate', {
+    ...fpOpts,
+    onChange(dates, dateStr) {
+      if (_fpEnd) _fpEnd.set('minDate', dateStr);
+      calcTotal();
+    }
+  });
+  _fpEnd = flatpickr('#mEndDate', { ...fpOpts, minDate: heroS || today });
+
+  if (heroS) _fpStart.setDate(heroS);
+  if (heroE) _fpEnd.setDate(heroE);
 
   goStep(1);
   document.getElementById('modalOverlay').classList.add('open');

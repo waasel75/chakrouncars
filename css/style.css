@@ -1503,6 +1503,22 @@ input, select, textarea, button { font-family: inherit; }
 .city-pill-name  { font-size: 0.92rem; font-weight: 600; color: var(--white); }
 .city-pill-dot   { width: 6px; height: 6px; border-radius: 50%; background: var(--red); opacity: 0.6; }
 
+/* ===== FLATPICKR DARK THEME ===== */
+.flatpickr-calendar { background:#1a1d24!important; border:1px solid rgba(255,255,255,.1)!important; box-shadow:0 8px 32px rgba(0,0,0,.5)!important; border-radius:12px!important; }
+.flatpickr-months, .flatpickr-weekdays { background:#1a1d24!important; }
+.flatpickr-month, .flatpickr-current-month, .flatpickr-monthDropdown-months { color:#fff!important; fill:#fff!important; background:#1a1d24!important; }
+.flatpickr-weekday { color:#888!important; background:#1a1d24!important; }
+.flatpickr-day { color:#e2e8f0!important; border-radius:8px!important; }
+.flatpickr-day:hover { background:#2d3748!important; border-color:transparent!important; }
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background:#e63329!important; border-color:#e63329!important; color:#fff!important; }
+.flatpickr-day.disabled, .flatpickr-day.disabled:hover { background:rgba(230,51,41,.12)!important; color:#e63329!important; opacity:.6; text-decoration:line-through; cursor:not-allowed!important; }
+.flatpickr-day.flatpickr-disabled { pointer-events:none; }
+.flatpickr-day.today { border-color:#e63329!important; }
+.numInputWrapper span { border-color:rgba(255,255,255,.1)!important; }
+.numInputWrapper span:hover { background:rgba(255,255,255,.05)!important; }
+.flatpickr-prev-month svg, .flatpickr-next-month svg { fill:#fff!important; }
+.flatpickr-prev-month:hover, .flatpickr-next-month:hover { background:rgba(255,255,255,.05)!important; border-radius:6px!important; }
+
 /* ===== BOOKING MODAL ===== */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 9000;
