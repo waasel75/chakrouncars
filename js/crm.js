@@ -3,10 +3,11 @@
 const WA_CRM = '212634829085';
 
 const ST = {
-  pending:  { label:'En attente',  color:'var(--yellow)', icon:'⏳' },
-  confirmed:{ label:'Confirmé',    color:'var(--green)',  icon:'✅' },
-  completed:{ label:'Terminé',     color:'var(--blue)',   icon:'🏁' },
-  cancelled:{ label:'Annulé',      color:'var(--red)',    icon:'❌' },
+  pending:         { label:'En attente',        color:'var(--yellow)', icon:'⏳' },
+  payment_pending: { label:'Paiement en cours', color:'#f97316',       icon:'💳' },
+  confirmed:       { label:'Confirmé',          color:'var(--green)',  icon:'✅' },
+  completed:       { label:'Terminé',           color:'var(--blue)',   icon:'🏁' },
+  cancelled:       { label:'Annulé',            color:'var(--red)',    icon:'❌' },
 };
 
 /* ── FIREBASE SYNC ── */
@@ -159,7 +160,7 @@ function renderDashboard() {
   const confirmed = all.filter(r => r.status === 'confirmed').length;
   const completed = all.filter(r => r.status === 'completed').length;
   const cancelled = all.filter(r => r.status === 'cancelled').length;
-  const revenue   = all.filter(r => r.status !== 'cancelled').reduce((s, r) => s + +r.total, 0);
+  const revenue   = all.filter(r => r.status === 'completed').reduce((s, r) => s + +r.total, 0);
   const clients   = new Set(all.map(r => r.phone)).size;
 
   document.getElementById('dashKpi').innerHTML = `

@@ -320,3 +320,18 @@ tr:hover td{background:rgba(255,255,255,.015)}
   .kpi-grid{grid-template-columns:1fr 1fr}
   table{font-size:.75rem}th,td{padding:8px 8px}
 }
+
+/* ===== RESERVATION NOTIFICATION ===== */
+.res-notif-item{display:flex;align-items:center;gap:12px;background:#1a1d24;border:1px solid rgba(255,255,255,.1);border-left:3px solid var(--red);border-radius:10px;padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:slideInRight .3s ease;cursor:default}
+@keyframes slideInRight{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+.res-notif-icon{font-size:1.4rem;flex-shrink:0;animation:ring .6s ease}
+@keyframes ring{0%,100%{transform:rotate(0)}25%{transform:rotate(-15deg)}75%{transform:rotate(15deg)}}
+.res-notif-body{flex:1;min-width:0}
+.res-notif-title{font-weight:700;font-size:.85rem;color:#fff}
+.res-notif-sub{color:#94a3b8;font-size:.75rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-notif-close{background:none;border:none;color:#64748b;font-size:.85rem;cursor:pointer;padding:2px 6px;border-radius:4px;flex-shrink:0}
+.res-notif-close:hover{color:#fff;background:rgba(255,255,255,.08)}
+
+/* ===== PAYMENT PENDING BADGE ===== */
+.badge-payment_pending{background:rgba(249,115,22,.15);color:#f97316}
+.status-select option[value=payment_pending]{color:#f97316}

@@ -3,10 +3,11 @@
 const WA    = '212634829085';
 
 const STATUS = {
-  pending:  { label:'En attente',  color:'var(--yellow)', icon:'⏳' },
-  confirmed:{ label:'Confirmé',    color:'var(--green)',  icon:'✅' },
-  completed:{ label:'Terminé',     color:'var(--blue)',   icon:'🏁' },
-  cancelled:{ label:'Annulé',      color:'var(--red)',    icon:'❌' },
+  pending:         { label:'En attente',       color:'var(--yellow)', icon:'⏳' },
+  payment_pending: { label:'Paiement en cours',color:'#f97316',       icon:'💳' },
+  confirmed:       { label:'Confirmé',         color:'var(--green)',  icon:'✅' },
+  completed:       { label:'Terminé',          color:'var(--blue)',   icon:'🏁' },
+  cancelled:       { label:'Annulé',           color:'var(--red)',    icon:'❌' },
 };
 
 /* ===== AUTH ===== */
@@ -129,20 +130,92 @@ function toast(msg) {
 
 /* ===== NOTIF ===== */
 function renderNotif() {
-  const n = getAll().filter(r=>r.status==='pending').length;
+  const all = getAll();
+  const n = all.filter(r=>r.status==='pending'||r.status==='payment_pending').length;
   const el = document.getElementById('notifBadge');
   if (n) { el.textContent = n+' en attente'; el.style.display='block'; }
   else   { el.style.display='none'; }
+}
+
+/* ===== REAL-TIME NEW RESERVATION ALERT ===== */
+let _lastResCount = -1;
+let _lastResIds   = new Set();
+
+function checkNewReservations() {
+  const all  = getAll();
+  const ids  = new Set(all.map(r => String(r.id)));
+  if (_lastResCount === -1) { _lastResCount = all.length; _lastResIds = ids; return; }
+
+  const newOnes = all.filter(r => !_lastResIds.has(String(r.id)));
+  if (newOnes.length) {
+    newOnes.forEach(r => showResNotif(r));
+  }
+  _lastResCount = all.length;
+  _lastResIds   = ids;
+}
+
+function showResNotif(r) {
+  const box = document.getElementById('resNotifBox');
+  if (!box) return;
+  const el = document.createElement('div');
+  el.className = 'res-notif-item';
+  el.innerHTML = `
+    <div class="res-notif-icon">🔔</div>
+    <div class="res-notif-body">
+      <div class="res-notif-title">Nouvelle réservation !</div>
+      <div class="res-notif-sub">${esc(r.name)} — ${esc(r.car)} — ${fmtN(r.total)} MAD</div>
+    </div>
+    <button class="res-notif-close" onclick="this.closest('.res-notif-item').remove()">✕</button>
+  `;
+  box.appendChild(el);
+  renderNotif();
+  renderDashboard();
+  renderTable();
+  // auto-remove after 8s
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 8000);
+  // try browser notification
+  if (Notification?.permission === 'granted') {
+    new Notification('🔔 Nouvelle réservation — MarocDrive', {
+      body: `${r.name} · ${r.car} · ${fmtN(r.total)} MAD`,
+      icon: '/images/cars/car-1.jpg.jpg'
+    });
+  }
+}
+
+function startRealtimeSync() {
+  // sync from Firebase + check new reservations every 30s
+  const FB_URL = (typeof SITE !== 'undefined' && SITE.firebaseUrl && !SITE.firebaseUrl.includes('YOUR_PROJECT'))
+    ? SITE.firebaseUrl : null;
+  if (!FB_URL) return;
+
+  setInterval(async () => {
+    try {
+      const r = await fetch(`${FB_URL}/reservations.json`);
+      if (!r.ok) return;
+      const data = await r.json();
+      if (!Array.isArray(data)) return;
+      const cur = JSON.parse(localStorage.getItem('md_reservations')||'[]');
+      if (JSON.stringify(data) !== JSON.stringify(cur)) {
+        localStorage.setItem('md_reservations', JSON.stringify(data));
+        checkNewReservations();
+      }
+    } catch(e) {}
+  }, 30000);
+}
+
+function requestNotifPermission() {
+  if (Notification?.permission === 'default') Notification.requestPermission();
 }
 
 /* ===== DASHBOARD ===== */
 function renderDashboard() {
   const all = getAll();
   const total     = all.length;
-  const pending   = all.filter(r=>r.status==='pending').length;
-  const confirmed = all.filter(r=>r.status==='confirmed').length;
-  const cancelled = all.filter(r=>r.status==='cancelled').length;
-  const revenue   = all.filter(r=>r.status!=='cancelled').reduce((s,r)=>s+ +r.total,0);
+  const pending         = all.filter(r=>r.status==='pending').length;
+  const payment_pending = all.filter(r=>r.status==='payment_pending').length;
+  const confirmed       = all.filter(r=>r.status==='confirmed').length;
+  const cancelled       = all.filter(r=>r.status==='cancelled').length;
+  const revenue         = all.filter(r=>r.status==='completed').reduce((s,r)=>s+ +r.total,0);
 
   // KPI
   document.getElementById('kpiGrid').innerHTML = `
@@ -156,13 +229,14 @@ function renderDashboard() {
       <div class="kpi-icon">💰</div>
       <div class="kpi-val" style="font-size:1.5rem">${fmtN(revenue)}</div>
       <div class="kpi-label">Chiffre d'affaires (MAD)</div>
-      <div class="kpi-sub up">Hors annulations</div>
+      <div class="kpi-sub up">Réservations terminées uniquement</div>
     </div>
     <div class="kpi-card c-yellow">
       <div class="kpi-icon">⏳</div>
-      <div class="kpi-val" style="color:var(--yellow)">${pending}</div>
+      <div class="kpi-val" style="color:var(--yellow)">${pending + payment_pending}</div>
       <div class="kpi-label">En attente</div>
-      ${pending?`<div class="kpi-sub warn">Action requise</div>`:'<div class="kpi-sub up">Aucune en attente</div>'}
+      ${payment_pending?`<div class="kpi-sub" style="color:#f97316">💳 ${payment_pending} paiement en cours</div>`:
+        pending?`<div class="kpi-sub warn">Action requise</div>`:'<div class="kpi-sub up">Aucune en attente</div>'}
     </div>
     <div class="kpi-card c-blue">
       <div class="kpi-icon">✅</div>
@@ -605,6 +679,9 @@ function init() {
   renderNotif();
   initChatToggle();
   initCRMToggle();
+  checkNewReservations(); // init baseline
+  startRealtimeSync();
+  requestNotifPermission();
   checkNewChats(false);
 }
 
