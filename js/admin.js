@@ -171,8 +171,6 @@ function showResNotif(r) {
   renderNotif();
   renderDashboard();
   renderTable();
-  // auto-remove after 8s
-  setTimeout(() => { if (el.parentNode) el.remove(); }, 8000);
   // try browser notification
   if (Notification?.permission === 'granted') {
     new Notification('🔔 Nouvelle réservation — MarocDrive', {
