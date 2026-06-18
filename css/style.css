@@ -1508,12 +1508,17 @@ input, select, textarea, button { font-family: inherit; }
 .flatpickr-months, .flatpickr-weekdays { background:#1a1d24!important; }
 .flatpickr-month, .flatpickr-current-month, .flatpickr-monthDropdown-months { color:#fff!important; fill:#fff!important; background:#1a1d24!important; }
 .flatpickr-weekday { color:#888!important; background:#1a1d24!important; }
-.flatpickr-day { color:#e2e8f0!important; border-radius:8px!important; }
-.flatpickr-day:hover { background:#2d3748!important; border-color:transparent!important; }
-.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background:#e63329!important; border-color:#e63329!important; color:#fff!important; }
-.flatpickr-day.disabled, .flatpickr-day.disabled:hover { background:rgba(230,51,41,.12)!important; color:#e63329!important; opacity:.6; text-decoration:line-through; cursor:not-allowed!important; }
-.flatpickr-day.flatpickr-disabled { pointer-events:none; }
-.flatpickr-day.today { border-color:#e63329!important; }
+/* Available days → green tint */
+.flatpickr-day { color:#e2e8f0!important; border-radius:8px!important; background:rgba(34,197,94,.13)!important; border:1px solid rgba(34,197,94,.2)!important; }
+.flatpickr-day:hover { background:rgba(34,197,94,.28)!important; border-color:rgba(34,197,94,.5)!important; }
+/* Selected */
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background:#22c55e!important; border-color:#22c55e!important; color:#fff!important; }
+/* Unavailable / reserved days → red */
+.flatpickr-day.disabled, .flatpickr-day.disabled:hover, .flatpickr-day.flatpickr-disabled { background:rgba(230,51,41,.18)!important; color:#f87171!important; border:1px solid rgba(230,51,41,.3)!important; text-decoration:line-through; cursor:not-allowed!important; pointer-events:none; }
+/* Past days (before today) → neutral gray */
+.flatpickr-day.flatpickr-disabled.prevMonthDay,
+.flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { background:transparent!important; border-color:transparent!important; color:#444!important; text-decoration:none; }
+.flatpickr-day.today { border-color:#22c55e!important; font-weight:700; }
 .numInputWrapper span { border-color:rgba(255,255,255,.1)!important; }
 .numInputWrapper span:hover { background:rgba(255,255,255,.05)!important; }
 .flatpickr-prev-month svg, .flatpickr-next-month svg { fill:#fff!important; }
