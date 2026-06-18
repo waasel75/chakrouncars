@@ -1185,13 +1185,15 @@ function calNav(dir) { calMonth += dir; if (calMonth > 11) { calMonth = 0; calYe
 
 function getCarBusyDates(carName) {
   const reservations = JSON.parse(localStorage.getItem('md_reservations') || '[]');
+  const blocks = JSON.parse(localStorage.getItem('md_blocks') || '{}')[carName] || [];
   const busy = new Set();
-  reservations.filter(r => r.car === carName && r.status !== 'cancelled').forEach(r => {
-    const s = new Date(r.start), e = new Date(r.end);
-    for (let d = new Date(s); d < e; d.setDate(d.getDate() + 1)) {
+  const addRange = (start, end) => {
+    for (let d = new Date(start); d <= new Date(end); d.setDate(d.getDate() + 1))
       busy.add(d.toISOString().split('T')[0]);
-    }
-  });
+  };
+  reservations.filter(r => r.car === carName && r.status !== 'cancelled')
+    .forEach(r => addRange(r.start, r.end));
+  blocks.forEach(b => addRange(b.start, b.end));
   return busy;
 }
 
