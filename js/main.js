@@ -823,16 +823,23 @@ let activeCarData = null;
 
 let _fpStart = null, _fpEnd = null;
 
-function getDisabledRanges(carName) {
+function buildDisableFn(carName) {
   const reservations = JSON.parse(localStorage.getItem('md_reservations') || '[]');
   const blocks = JSON.parse(localStorage.getItem('md_blocks') || '{}')[carName] || [];
   const ranges = [];
   reservations.forEach(r => {
     if (r.car === carName && r.status !== 'cancelled')
-      ranges.push({ from: r.start, to: r.end });
+      ranges.push([new Date(r.start), new Date(r.end)]);
   });
-  blocks.forEach(b => ranges.push({ from: b.start, to: b.end }));
-  return ranges;
+  blocks.forEach(b => ranges.push([new Date(b.start), new Date(b.end)]));
+  return function(date) {
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return ranges.some(([s, e]) => {
+      const from = new Date(s.getFullYear(), s.getMonth(), s.getDate());
+      const to   = new Date(e.getFullYear(), e.getMonth(), e.getDate());
+      return d >= from && d <= to;
+    });
+  };
 }
 
 function bookCar(name) {
@@ -847,15 +854,14 @@ function bookCar(name) {
   const today = new Date().toISOString().split('T')[0];
   const heroS = document.getElementById('startDate')?.value;
   const heroE = document.getElementById('endDate')?.value;
-  const disabled = getDisabledRanges(car.name);
+  const disableFn = buildDisableFn(car.name);
 
-  // destroy previous instances
   if (_fpStart) { _fpStart.destroy(); _fpStart = null; }
   if (_fpEnd)   { _fpEnd.destroy();   _fpEnd = null; }
 
   const fpOpts = {
     minDate: today,
-    disable: disabled,
+    disable: [disableFn],
     locale: { firstDayOfWeek: 1 },
     dateFormat: 'Y-m-d',
     disableMobile: false,
