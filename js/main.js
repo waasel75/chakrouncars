@@ -877,6 +877,10 @@ function validateStep1() {
   const c = document.getElementById('mCity').value;
   if (!s || !e || !c) { showToast('⚠️ Veuillez remplir tous les champs obligatoires.'); return false; }
   if (new Date(e) <= new Date(s)) { showToast('⚠️ La date de fin doit être après la date de début.'); return false; }
+  if (activeCarData && !isCarAvailable(activeCarData.name, s, e)) {
+    showToast('❌ Ce véhicule est déjà réservé pour ces dates. Veuillez choisir d\'autres dates.');
+    return false;
+  }
   return true;
 }
 
