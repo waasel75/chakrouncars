@@ -111,6 +111,7 @@ function init() {
   renderResCarSelect();
   loadSiteSettings();
   loadBookingConfig();
+  initBlockDatePickers();
 }
 
 window.addEventListener('db-synced', () => {
@@ -385,6 +386,23 @@ function deleteCar(id) {
 
 /* ===================== RESERVATIONS TAB ===================== */
 let resYear, resMonth;
+let _fpBlockStart = null, _fpBlockEnd = null;
+
+function initBlockDatePickers() {
+  if (typeof flatpickr === 'undefined') return;
+  const fpOpts = {
+    dateFormat: 'Y-m-d',
+    locale: { firstDayOfWeek: 1 },
+    disableMobile: false
+  };
+  if (!_fpBlockStart) {
+    _fpBlockStart = flatpickr('#sBlockStart', {
+      ...fpOpts,
+      onChange([d]) { if (_fpBlockEnd) _fpBlockEnd.set('minDate', d || null); }
+    });
+  }
+  if (!_fpBlockEnd) _fpBlockEnd = flatpickr('#sBlockEnd', fpOpts);
+}
 
 function renderResCarSelect() {
   const sel = document.getElementById('sResCar');
