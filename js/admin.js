@@ -138,54 +138,79 @@ function renderNotif() {
 }
 
 /* ===== REAL-TIME NEW RESERVATION ALERT ===== */
-let _lastResCount = -1;
-let _lastResIds   = new Set();
+let _lastResIds = new Set();
+let _notifs     = []; // persists until dismissed
 
-function checkNewReservations() {
-  const all  = getAll();
-  const ids  = new Set(all.map(r => String(r.id)));
-  if (_lastResCount === -1) { _lastResCount = all.length; _lastResIds = ids; return; }
-
-  const newOnes = all.filter(r => !_lastResIds.has(String(r.id)));
-  if (newOnes.length) {
-    newOnes.forEach(r => showResNotif(r));
-  }
-  _lastResCount = all.length;
-  _lastResIds   = ids;
+function _initBaseline() {
+  getAll().forEach(r => _lastResIds.add(String(r.id)));
 }
 
-function showResNotif(r) {
-  const box = document.getElementById('resNotifBox');
-  if (!box) return;
-  const el = document.createElement('div');
-  el.className = 'res-notif-item';
-  el.innerHTML = `
-    <div class="res-notif-icon">🔔</div>
-    <div class="res-notif-body">
-      <div class="res-notif-title">Nouvelle réservation !</div>
-      <div class="res-notif-sub">${esc(r.name)} — ${esc(r.car)} — ${fmtN(r.total)} MAD</div>
-    </div>
-    <button class="res-notif-close" onclick="this.closest('.res-notif-item').remove()">✕</button>
-  `;
-  box.appendChild(el);
-  renderNotif();
-  renderDashboard();
-  renderTable();
-  // try browser notification
+function checkNewReservations() {
+  const all = getAll();
+  const newOnes = all.filter(r => !_lastResIds.has(String(r.id)));
+  newOnes.forEach(r => {
+    _lastResIds.add(String(r.id));
+    _addNotif(r);
+  });
+  if (newOnes.length) { renderDashboard(); renderTable(); }
+}
+
+function _addNotif(r) {
+  _notifs.push({ id: r.id, name: r.name, car: r.car, total: r.total, city: r.city || '', ts: Date.now() });
+  _renderBell();
   if (Notification?.permission === 'granted') {
     new Notification('🔔 Nouvelle réservation — MarocDrive', {
-      body: `${r.name} · ${r.car} · ${fmtN(r.total)} MAD`,
-      icon: '/images/cars/car-1.jpg.jpg'
+      body: `${r.name} · ${r.car} · ${fmtN(r.total)} MAD`
     });
   }
 }
 
+function _renderBell() {
+  const wrap = document.getElementById('bellWrap');
+  const count = document.getElementById('bellCount');
+  const list  = document.getElementById('notifPanelList');
+  if (!wrap) return;
+  if (!_notifs.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  count.textContent  = _notifs.length;
+  list.innerHTML = _notifs.map((n, i) => `
+    <div class="notif-item">
+      <div class="notif-item-icon">🔔</div>
+      <div class="notif-item-body">
+        <div class="notif-item-title">Nouvelle réservation #${n.id}</div>
+        <div class="notif-item-sub">${esc(n.name)} · ${esc(n.car)} · ${fmtN(n.total)} MAD</div>
+      </div>
+      <button class="notif-item-close" onclick="dismissNotif(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function toggleNotifPanel() {
+  document.getElementById('notifPanel').classList.toggle('open');
+}
+
+function dismissNotif(i) {
+  _notifs.splice(i, 1);
+  _renderBell();
+  if (!_notifs.length) document.getElementById('notifPanel').classList.remove('open');
+}
+
+function dismissAllNotifs() {
+  _notifs = [];
+  _renderBell();
+  document.getElementById('notifPanel').classList.remove('open');
+}
+
+// close panel when clicking outside
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('bellWrap');
+  if (wrap && !wrap.contains(e.target)) document.getElementById('notifPanel')?.classList.remove('open');
+});
+
 function startRealtimeSync() {
-  // sync from Firebase + check new reservations every 30s
   const FB_URL = (typeof SITE !== 'undefined' && SITE.firebaseUrl && !SITE.firebaseUrl.includes('YOUR_PROJECT'))
     ? SITE.firebaseUrl : null;
   if (!FB_URL) return;
-
   setInterval(async () => {
     try {
       const r = await fetch(`${FB_URL}/reservations.json`);
@@ -677,15 +702,24 @@ function init() {
   renderNotif();
   initChatToggle();
   initCRMToggle();
-  checkNewReservations(); // init baseline
+  _initBaseline();
   startRealtimeSync();
   requestNotifPermission();
   checkNewChats(false);
-}
 
-window.addEventListener('storage', e => {
-  if (e.key === 'md_chat_conversations') checkNewChats(true);
-});
+  // detect new reservations from any tab (cross-tab)
+  window.addEventListener('storage', e => {
+    if (e.key === 'md_reservations') checkNewReservations();
+    if (e.key === 'md_chat_conversations') checkNewChats(true);
+  });
+
+  // detect new reservations same-tab (when admin itself saves)
+  const _orig = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(key, val) {
+    _orig(key, val);
+    if (key === 'md_reservations') checkNewReservations();
+  };
+}
 
 if (sessionStorage.getItem('md_admin')==='1') {
   document.getElementById('loginScreen').style.display='none';

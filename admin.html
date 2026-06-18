@@ -108,6 +108,18 @@
       </div>
       <div class="topbar-right">
         <div class="notif-badge" id="notifBadge" style="display:none"></div>
+        <div class="bell-wrap" id="bellWrap" style="display:none">
+          <button class="bell-btn" onclick="toggleNotifPanel()">
+            🔔<span class="bell-count" id="bellCount">0</span>
+          </button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-panel-header">
+              <span>🔔 Nouvelles réservations</span>
+              <button onclick="dismissAllNotifs()">Tout effacer</button>
+            </div>
+            <div class="notif-panel-list" id="notifPanelList"></div>
+          </div>
+        </div>
         <span class="admin-chip">👤 Admin</span>
       </div>
     </header>
@@ -221,8 +233,6 @@
 
 <!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
-<div id="resNotifBox" style="position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:340px"></div>
-</div>
 
 <!-- Export Modal -->
 <div class="modal-overlay" id="exportOverlay" onclick="if(event.target===this)closeExportModal()" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;">
