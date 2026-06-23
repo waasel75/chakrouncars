@@ -741,7 +741,7 @@ function doExport() {
 
   // ── Résumé ──
   const ws1 = XLSX.utils.aoa_to_sheet([
-    ['📊 RAPPORT MAROCDRIVE','',''],
+    ['📊 RAPPORT CHAKROUN CARS','',''],
     ['Période', PERIOD_LABELS[period],''],
     ['Généré le', fmtDT(new Date()),''],
     ['','',''],
