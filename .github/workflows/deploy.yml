@@ -1,0 +1,44 @@
+name: Deploy to Hostinger
+
+# Runs on every push to main, and can also be triggered manually
+# from the GitHub "Actions" tab (Run workflow button).
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: hostinger-deploy
+  cancel-in-progress: true
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy site to Hostinger via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          # Hostinger web root for the main domain. If your FTP account
+          # already opens inside public_html, change this to "./".
+          server-dir: /public_html/
+          local-dir: ./
+          # Don't upload dev/config files that aren't part of the website
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/.claude/**
+            **/.mcp.json
+            **/.env*
+            **/*.log
+            **/node_modules/**
+            supabase-setup.sql
+            .gitignore
