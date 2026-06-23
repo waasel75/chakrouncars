@@ -5,15 +5,17 @@
 const SITE = {
 
   // --- Nom & Contact ---
-  name:      'MarocDrive',
+  name:      'Chakroun Cars',
   phone:     '+212 634 829 085',
   whatsapp:  '212634829085',       // sans + ni espaces
-  email:     'contact@marocdrive.ma',
+  email:     'contact@chakrouncars.com',
 
-  // --- Firebase Realtime Database ---
-  // Créez votre projet sur https://console.firebase.google.com
-  // Realtime Database → créer → copier l'URL ci-dessous
-  firebaseUrl: 'https://v1-claude-code-35dce-default-rtdb.firebaseio.com',
+  // --- Supabase (backend) ---
+  // Créez votre projet sur https://supabase.com → New project
+  // SQL Editor → exécutez le script supabase-setup.sql fourni à la racine
+  // Project Settings → API → copiez "Project URL" et "anon public" key ci-dessous
+  supabaseUrl:     'https://vbkdqdwsobtgdikvvapw.supabase.co',
+  supabaseAnonKey: 'sb_publishable_5zbwYYeK3AmaDFhVfmH-KQ_B86JLNsx',
 
   // --- Voitures par défaut ---
   // Ces voitures apparaissent si la base Firebase est vide

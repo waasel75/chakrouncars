@@ -205,6 +205,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+/* ── VEHICLES / VIDANGE ── */
+.crm-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.crm-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: .85rem; }
+.crm-row:last-of-type { border-bottom: none; }
+.crm-btn-sm { background: var(--bg2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 5px 9px; font-size: .72rem; font-weight: 600; cursor: pointer; }
+.crm-btn-sm:hover { background: var(--bg3); }
+
 /* ── RESPONSIVE ── */
 @media(max-width: 680px) {
   .crm-sidebar { position: fixed; left: -220px; z-index: 500; transition: left .25s; }
@@ -213,4 +220,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   .kpi-grid { grid-template-columns: 1fr 1fr; }
   .client-grid { grid-template-columns: 1fr; }
   .crm-table-wrap { overflow-x: auto; }
+  .crm-cards-grid { grid-template-columns: 1fr; }
+  .crm-modal { width: 94vw; padding: 18px; }
 }

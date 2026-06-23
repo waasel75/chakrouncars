@@ -1,66 +1,76 @@
 'use strict';
 
 // ============================================================
-//  FIREBASE SYNC — remplissez FB_URL avec votre projet
-//  1. Allez sur https://console.firebase.google.com
-//  2. Créez un projet → Realtime Database → Créer une base
-//  3. Copiez l'URL (ex: https://mon-projet-default-rtdb.firebaseio.com)
-//  4. Dans Règles, mettez: { "rules": { ".read": true, ".write": true } }
+//  SUPABASE SYNC — remplissez supabaseUrl + supabaseAnonKey dans config.js
+//  1. Allez sur https://supabase.com → New project
+//  2. SQL Editor → exécutez le script fourni (kv_store table)
+//  3. Project Settings → API → copiez "Project URL" et "anon public" key
 // ============================================================
-const FB_URL = (typeof SITE !== 'undefined' && SITE.firebaseUrl) ? SITE.firebaseUrl : 'YOUR_PROJECT';
+const SB_URL = (typeof SITE !== 'undefined' && SITE.supabaseUrl) ? SITE.supabaseUrl : 'YOUR_PROJECT';
+const SB_KEY = (typeof SITE !== 'undefined' && SITE.supabaseAnonKey) ? SITE.supabaseAnonKey : 'YOUR_KEY';
+const SB_READY = !SB_URL.includes('YOUR_PROJECT') && !SB_KEY.includes('YOUR_KEY');
 
-const FB_KEYS = [
-  'md_cars','md_reservations','md_offers','md_blocks',
+const SYNC_KEYS = [
+  'md_cars','md_reservations','md_offers','md_blocks','md_vehicles',
   'md_site_settings','md_chat_conversations','md_chat_config','md_booking_config'
 ];
 
-function _fbPath(lsKey) {
-  return `${FB_URL}/${lsKey.replace('md_','')}.json`;
+function _sbHeaders(extra) {
+  return Object.assign({ 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' }, extra || {});
 }
 
-async function fbGet(key) {
-  const r = await fetch(_fbPath(key));
+async function sbGetKV(key) {
+  if (!SB_READY) return null;
+  const r = await fetch(`${SB_URL}/rest/v1/kv_store?key=eq.${encodeURIComponent(key)}&select=value`, { headers: _sbHeaders() });
   if (!r.ok) return null;
-  return await r.json();
+  const rows = await r.json();
+  return rows.length ? rows[0].value : null;
 }
 
-async function fbSet(key, val) {
-  await fetch(_fbPath(key), {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(val)
+async function sbSetKV(key, val) {
+  if (!SB_READY) return;
+  await fetch(`${SB_URL}/rest/v1/kv_store?on_conflict=key`, {
+    method: 'POST',
+    headers: _sbHeaders({ 'Prefer': 'resolution=merge-duplicates' }),
+    body: JSON.stringify({ key, value: val })
   });
 }
 
-async function fbDel(key) {
-  await fetch(_fbPath(key), { method: 'DELETE' });
+async function sbDelKV(key) {
+  if (!SB_READY) return;
+  await fetch(`${SB_URL}/rest/v1/kv_store?key=eq.${encodeURIComponent(key)}`, { method: 'DELETE', headers: _sbHeaders() });
 }
 
-// Intercept localStorage writes → push to Firebase automatically
+window.SB_READY = SB_READY;
+window.sbGetKV = sbGetKV;
+window.sbSetKV = sbSetKV;
+window.sbDelKV = sbDelKV;
+
+// Intercept localStorage writes → push to Supabase automatically
 const _lsSet = localStorage.setItem.bind(localStorage);
 const _lsRem = localStorage.removeItem.bind(localStorage);
 
 localStorage.setItem = function(key, val) {
   _lsSet(key, val);
-  if (FB_KEYS.includes(key) && !FB_URL.includes('YOUR_PROJECT')) {
-    try { fbSet(key, JSON.parse(val)).catch(() => {}); } catch(e) {}
+  if (SYNC_KEYS.includes(key) && SB_READY) {
+    try { sbSetKV(key, JSON.parse(val)).catch(() => {}); } catch(e) {}
   }
 };
 
 localStorage.removeItem = function(key) {
   _lsRem(key);
-  if (FB_KEYS.includes(key) && !FB_URL.includes('YOUR_PROJECT')) {
-    fbDel(key).catch(() => {});
+  if (SYNC_KEYS.includes(key) && SB_READY) {
+    sbDelKV(key).catch(() => {});
   }
 };
 
-// On page load: pull latest data from Firebase → update localStorage → fire event
-(async function syncFromFirebase() {
-  if (FB_URL.includes('YOUR_PROJECT')) return;
+// On page load: pull latest data from Supabase → update localStorage → fire event
+(async function syncFromSupabase() {
+  if (!SB_READY) return;
   try {
     let changed = false;
-    for (const key of FB_KEYS) {
-      const data = await fbGet(key);
+    for (const key of SYNC_KEYS) {
+      const data = await sbGetKV(key);
       if (data !== null && data !== undefined) {
         const newVal = JSON.stringify(data);
         if (localStorage.getItem(key) !== newVal) {
@@ -71,6 +81,6 @@ localStorage.removeItem = function(key) {
     }
     if (changed) window.dispatchEvent(new Event('db-synced'));
   } catch (e) {
-    console.warn('[DB] Firebase sync failed, using local data:', e.message);
+    console.warn('[DB] Supabase sync failed, using local data:', e.message);
   }
 })();

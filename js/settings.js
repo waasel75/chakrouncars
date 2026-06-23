@@ -112,6 +112,8 @@ function init() {
   loadSiteSettings();
   loadBookingConfig();
   initBlockDatePickers();
+  const agencyName = (JSON.parse(localStorage.getItem('md_site_settings') || '{}').name) || 'Chakroun Cars';
+  if (document.title.includes('Chakroun Cars')) document.title = document.title.replace(/Chakroun Cars/g, agencyName);
 }
 
 window.addEventListener('db-synced', () => {
@@ -609,7 +611,7 @@ function loadSiteSettings() {
   const cfg = JSON.parse(localStorage.getItem('md_site_settings')||'{}');
   document.getElementById('cfgPhone').value   = cfg.phone   || (typeof SITE!=='undefined' ? SITE.phone    : '+212 6XX XXX XXX');
   document.getElementById('cfgWA').value      = cfg.wa      || (typeof SITE!=='undefined' ? SITE.whatsapp : '');
-  document.getElementById('cfgName').value    = cfg.name    || 'MarocDrive';
+  document.getElementById('cfgName').value    = cfg.name    || 'Chakroun Cars';
   document.getElementById('cfgLogo').value    = cfg.logo    || '';
   document.getElementById('cfgEmail').value   = cfg.email   || '';
   document.getElementById('cfgAddr').value    = cfg.address || '';
@@ -674,7 +676,7 @@ function factoryReset() {
 
 /* ===== CHATBOT SETTINGS ===== */
 function initChatbotTab() {
-  const cfg = JSON.parse(localStorage.getItem('md_chat_config') || '{"active":true,"agentName":"Assistant MarocDrive","welcomeMsg":""}');
+  const cfg = JSON.parse(localStorage.getItem('md_chat_config') || '{"active":true,"agentName":"Assistant Chakroun Cars","welcomeMsg":""}');
   document.getElementById('cbActive').checked  = cfg.active !== false;
   document.getElementById('cbName').value      = cfg.agentName || '';
   document.getElementById('cbWelcome').value   = cfg.welcomeMsg || '';
@@ -684,7 +686,7 @@ function initChatbotTab() {
 function saveChatbotConfig() {
   const cfg = {
     active:     document.getElementById('cbActive').checked,
-    agentName:  document.getElementById('cbName').value.trim() || 'Assistant MarocDrive',
+    agentName:  document.getElementById('cbName').value.trim() || 'Assistant Chakroun Cars',
     welcomeMsg: document.getElementById('cbWelcome').value.trim()
   };
   localStorage.setItem('md_chat_config', JSON.stringify(cfg));

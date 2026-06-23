@@ -10,6 +10,23 @@ const STATUS = {
   cancelled:       { label:'Annulé',           color:'var(--red)',    icon:'❌' },
 };
 
+/* ===== BRANDING ===== */
+function applyAdminBranding() {
+  const cfg = JSON.parse(localStorage.getItem('md_site_settings') || '{}');
+  const name = cfg.name || 'Chakroun Cars';
+  const isImg = /^(https?:|data:)/.test(cfg.logo || '');
+  const icon = isImg ? `<img src="${cfg.logo}" alt="" style="height:1.2em;vertical-align:middle;object-fit:contain"/>` : (cfg.logo || '🚗');
+  const words = name.trim().split(' ');
+  const last = words.pop();
+  const nameHtml = (words.length ? esc(words.join(' ')) + ' ' : '') + `<strong>${esc(last)}</strong>`;
+  const loginLogo = document.getElementById('brandLoginLogo');
+  if (loginLogo) loginLogo.innerHTML = `${icon} ${nameHtml} <span>Admin</span>`;
+  const sbLogo = document.getElementById('brandSbLogo');
+  if (sbLogo) sbLogo.innerHTML = `${icon} ${nameHtml}`;
+  if (document.title.includes('Chakroun Cars')) document.title = document.title.replace(/Chakroun Cars/g, name);
+}
+applyAdminBranding();
+
 /* ===== AUTH ===== */
 function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
@@ -73,17 +90,70 @@ function togglePass() {
 
 function toggleSidebar() {
   const sb = document.getElementById('sidebar');
-  sb.classList.toggle('collapsed');
-  sb.classList.toggle('open'); // mobile
+  if (window.innerWidth <= 768) {
+    sb.classList.toggle('open');
+    document.getElementById('sidebarBackdrop')?.classList.toggle('show', sb.classList.contains('open'));
+  } else {
+    sb.classList.toggle('collapsed');
+  }
 }
 
 /* ===== DB ===== */
-function getAll()      { return JSON.parse(localStorage.getItem('md_reservations')||'[]'); }
-function saveAll(data) { localStorage.setItem('md_reservations', JSON.stringify(data)); renderNotif(); }
+const PAGE_SOURCE = typeof window.PAGE_SOURCE !== 'undefined' ? window.PAGE_SOURCE : 'all';
+
+function getAll() {
+  const all = JSON.parse(localStorage.getItem('md_reservations')||'[]').map(r => ({ source:'web', amountPaid:0, ...r }));
+  return PAGE_SOURCE === 'all' ? all : all.filter(r => r.source === PAGE_SOURCE);
+}
+function saveAll(data) {
+  const all = JSON.parse(localStorage.getItem('md_reservations')||'[]');
+  const merged = PAGE_SOURCE === 'all'
+    ? data
+    : all.filter(r => (r.source||'web') !== PAGE_SOURCE).concat(data);
+  localStorage.setItem('md_reservations', JSON.stringify(merged));
+  renderNotif();
+}
+
+/* ===== PAYMENT ===== */
+function paymentInfo(r) {
+  const total  = +r.total || 0;
+  const paid   = Math.min(+r.amountPaid || 0, total);
+  const due    = Math.max(total - paid, 0);
+  return { total, paid, due, full: due <= 0 && total > 0 };
+}
+function paymentBadge(r) {
+  const p = paymentInfo(r);
+  if (p.total <= 0) return '';
+  return p.full
+    ? `<span class="badge" style="background:rgba(34,197,94,.15);color:var(--green)">✅ Payé complet</span>`
+    : `<span class="badge" style="background:rgba(249,115,22,.15);color:#f97316">💳 Avance — reste ${fmtN(p.due)} MAD</span>`;
+}
+function sourceBadge(r) {
+  return r.source === 'manual'
+    ? `<span class="badge" style="background:rgba(96,165,250,.15);color:#60a5fa">📞 Manuel</span>`
+    : `<span class="badge" style="background:rgba(230,51,41,.15);color:var(--red)">🌐 Site web</span>`;
+}
+
+function setPayment(id, amountPaid) {
+  saveAll(getAll().map(r => r.id==id ? {...r, amountPaid: Math.max(0, +amountPaid||0)} : r));
+  toast('💰 Paiement mis à jour');
+  renderTable(); renderDashboard();
+}
+
+function addPayment(id, extra) {
+  extra = +extra || 0;
+  if (extra <= 0) { toast('⚠️ Montant invalide'); return; }
+  const r = getAll().find(r=>r.id==id);
+  if (!r) return;
+  const p = paymentInfo(r);
+  const newPaid = Math.min(p.paid + extra, p.total);
+  setPayment(id, newPaid);
+  showDetail(id);
+}
 
 function updateStatus(id, status) {
   saveAll(getAll().map(r => r.id==id ? {...r, status} : r));
-  toast(`${STATUS[status].icon} Statut mis à jour : ${STATUS[status].label}`);
+  toast(`${STATUS[status].icon} Statut mis à jour : ${statusLabel(status)}`);
   renderTable(); renderDashboard();
 }
 
@@ -111,12 +181,14 @@ const fmt  = d => new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'s
 const fmtN = n => Number(n).toLocaleString('fr-FR');
 const initials = name => name?.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase() || '?';
 
+function statusLabel(k) { return (typeof T==='function' ? T('st-'+k) : null) || STATUS[k]?.label || k; }
+
 function badge(s) {
-  return `<span class="badge badge-${s}">${STATUS[s]?.label||s}</span>`;
+  return `<span class="badge badge-${s}">${statusLabel(s)}</span>`;
 }
 
 function statusOptions(cur) {
-  return Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${cur===k?'selected':''}>${v.icon} ${v.label}</option>`).join('');
+  return Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${cur===k?'selected':''}>${v.icon} ${statusLabel(k)}</option>`).join('');
 }
 
 /* ===== TOAST ===== */
@@ -133,6 +205,7 @@ function renderNotif() {
   const all = getAll();
   const n = all.filter(r=>r.status==='pending'||r.status==='payment_pending').length;
   const el = document.getElementById('notifBadge');
+  if (!el) return;
   if (n) { el.textContent = n+' en attente'; el.style.display='block'; }
   else   { el.style.display='none'; }
 }
@@ -159,7 +232,8 @@ function _addNotif(r) {
   _notifs.push({ id: r.id, name: r.name, car: r.car, total: r.total, city: r.city || '', ts: Date.now() });
   _renderBell();
   if (Notification?.permission === 'granted') {
-    new Notification('🔔 Nouvelle réservation — MarocDrive', {
+    const agencyName = (JSON.parse(localStorage.getItem('md_site_settings') || '{}').name) || 'Chakroun Cars';
+    new Notification(`🔔 Nouvelle réservation — ${agencyName}`, {
       body: `${r.name} · ${r.car} · ${fmtN(r.total)} MAD`
     });
   }
@@ -208,14 +282,10 @@ document.addEventListener('click', e => {
 });
 
 function startRealtimeSync() {
-  const FB_URL = (typeof SITE !== 'undefined' && SITE.firebaseUrl && !SITE.firebaseUrl.includes('YOUR_PROJECT'))
-    ? SITE.firebaseUrl : null;
-  if (!FB_URL) return;
+  if (!window.SB_READY) return;
   setInterval(async () => {
     try {
-      const r = await fetch(`${FB_URL}/reservations.json`);
-      if (!r.ok) return;
-      const data = await r.json();
+      const data = await window.sbGetKV('md_reservations');
       if (!Array.isArray(data)) return;
       const cur = JSON.parse(localStorage.getItem('md_reservations')||'[]');
       if (JSON.stringify(data) !== JSON.stringify(cur)) {
@@ -239,9 +309,25 @@ function renderDashboard() {
   const confirmed       = all.filter(r=>r.status==='confirmed').length;
   const cancelled       = all.filter(r=>r.status==='cancelled').length;
   const revenue         = all.filter(r=>r.status==='completed').reduce((s,r)=>s+ +r.total,0);
+  const webCount        = all.filter(r=>r.source==='web').length;
+  const manualCount     = all.filter(r=>r.source==='manual').length;
+  const unpaidDue       = all.reduce((s,r)=>s+paymentInfo(r).due,0);
 
   // KPI
   document.getElementById('kpiGrid').innerHTML = `
+    ${PAGE_SOURCE==='all'?`
+    <div class="kpi-card c-blue">
+      <div class="kpi-icon">🔀</div>
+      <div class="kpi-val" style="font-size:1.3rem">🌐 ${webCount} · 📞 ${manualCount}</div>
+      <div class="kpi-label">Web vs Manuel</div>
+      <div class="kpi-sub up">Vue combinée</div>
+    </div>`:''}
+    <div class="kpi-card c-yellow">
+      <div class="kpi-icon">💳</div>
+      <div class="kpi-val" style="font-size:1.4rem;color:#f97316">${fmtN(unpaidDue)}</div>
+      <div class="kpi-label">Restant à percevoir (MAD)</div>
+      ${unpaidDue?'<div class="kpi-sub warn">Avances en attente</div>':'<div class="kpi-sub up">Tout payé ✓</div>'}
+    </div>
     <div class="kpi-card c-red">
       <div class="kpi-icon">📋</div>
       <div class="kpi-val">${total}</div>
@@ -319,12 +405,14 @@ function renderDashboard() {
 function renderTable() {
   const search = (document.getElementById('searchInput')?.value||'').toLowerCase();
   const status = document.getElementById('filterStatus')?.value||'';
+  const sourceF = document.getElementById('filterSource')?.value||'';
   let data = getAll();
   if (search) data = data.filter(r =>
     r.name?.toLowerCase().includes(search)||r.car?.toLowerCase().includes(search)||
     r.city?.toLowerCase().includes(search)||r.phone?.includes(search)
   );
   if (status) data = data.filter(r=>r.status===status);
+  if (sourceF) data = data.filter(r=>r.source===sourceF);
 
   const tbody = document.getElementById('resBody');
   const empty = document.getElementById('emptyState');
@@ -345,6 +433,8 @@ function renderTable() {
       </td>
       <td style="color:var(--muted)">${r.days}j</td>
       <td class="td-price">${fmtN(r.total)} <span style="color:var(--red);font-size:.7rem">MAD</span></td>
+      ${PAGE_SOURCE==='all'?`<td>${sourceBadge(r)}</td>`:''}
+      <td>${paymentBadge(r)||'—'}</td>
       <td><select class="status-select" onchange="updateStatus(${r.id},this.value)">${statusOptions(r.status)}</select></td>
       <td>
         <div class="actions">
@@ -368,7 +458,7 @@ function showDetail(id) {
       <span>📋 Réservation</span>
       <button class="modal-close-btn" onclick="closeDetail()">✕</button>
     </div>
-    <div style="margin-bottom:14px">${badge(r.status)}</div>
+    <div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap">${badge(r.status)}${sourceBadge(r)}</div>
     <div class="detail-row"><span class="dk">👤 Client</span><span class="dv">${esc(r.name)}</span></div>
     <div class="detail-row"><span class="dk">📞 Téléphone</span><span class="dv">${esc(r.phone)}</span></div>
     ${r.email?`<div class="detail-row"><span class="dk">✉️ Email</span><span class="dv">${esc(r.email)}</span></div>`:''}
@@ -382,15 +472,103 @@ function showDetail(id) {
       <span>💰 Total à payer</span>
       <span class="detail-total-val">${fmtN(r.total)} MAD</span>
     </div>
+    <div class="detail-row"><span class="dk">💳 Paiement</span><span class="dv">${paymentBadge(r)||'—'}</span></div>
+    <div class="detail-row"><span class="dk">✅ Déjà payé</span><span class="dv">${fmtN(paymentInfo(r).paid)} MAD</span></div>
+    <div class="detail-row"><span class="dk">⏳ Reste</span><span class="dv">${fmtN(paymentInfo(r).due)} MAD</span></div>
+    <div class="detail-row"><span class="dk">🔒 Caution</span><span class="dv">${r.hasCaution ? fmtN(r.caution)+' MAD' : 'Non prise'} <button class="act-btn" onclick="toggleCautionEdit(${r.id})">✏️</button></span></div>
+    <div id="caution_wrap_${r.id}"></div>
+    ${paymentInfo(r).due > 0 ? `
+    <div class="form-group">
+      <label>💰 Le client paie maintenant (MAD)</label>
+      <div style="display:flex;gap:8px">
+        <input id="addpay_${r.id}" type="number" min="0" max="${paymentInfo(r).due}" placeholder="Ex: 500"/>
+        <button class="btn-sm" onclick="addPayment(${r.id}, document.getElementById('addpay_${r.id}').value)">➕ Ajouter</button>
+      </div>
+      <button class="btn-sm" style="margin-top:6px;width:100%" onclick="addPayment(${r.id}, ${paymentInfo(r).due})">✅ Tout payer maintenant (${fmtN(paymentInfo(r).due)} MAD)</button>
+    </div>` : ''}
+    <button class="modal-btn-wa" style="margin-top:10px;width:100%" onclick="downloadInvoice(${r.id})">🧾 Télécharger la facture</button>
     <div class="detail-row"><span class="dk">🕐 Créé le</span><span class="dv">${new Date(r.createdAt).toLocaleString('fr-FR')}</span></div>
     <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-sm" style="width:100%" onclick="openEditReservation(${r.id})">✏️ Modifier toute la réservation</button>
       ${r.status==='pending'?`<button class="modal-btn-confirm" onclick="updateStatus(${r.id},'confirmed');closeDetail()">✅ Confirmer</button>`:''}
       ${r.status!=='cancelled'&&r.status!=='completed'?`<button class="modal-btn-cancel" onclick="updateStatus(${r.id},'cancelled');closeDetail()">❌ Annuler</button>`:''}
       <button class="modal-btn-wa" onclick="sendWA(${r.id})">📲 WhatsApp</button>
+      <button class="act-btn del" onclick="deleteRes(${r.id})">🗑️ Supprimer</button>
       <button class="modal-btn-close" onclick="closeDetail()">Fermer</button>
     </div>
   `;
   document.getElementById('detailOverlay').classList.add('open');
+}
+
+function toggleCautionEdit(id) {
+  const r = getAll().find(r=>r.id==id);
+  if (!r) return;
+  const wrap = document.getElementById('caution_wrap_'+id);
+  if (wrap.innerHTML) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = `
+    <label style="display:flex;align-items:center;gap:6px;font-size:.82rem">
+      <input type="checkbox" id="cau_has_${id}" ${r.hasCaution?'checked':''} onchange="document.getElementById('cau_amt_wrap_${id}').style.display=this.checked?'':'none'"/> Caution prise
+    </label>
+    <div id="cau_amt_wrap_${id}" style="display:${r.hasCaution?'':'none'};margin-top:6px">
+      <input id="cau_amt_${id}" type="number" min="0" placeholder="Montant MAD" value="${r.caution||0}"/>
+    </div>
+    <button class="act-btn ok" style="margin-top:6px" onclick="setCaution(${id}, document.getElementById('cau_has_${id}').checked, document.getElementById('cau_amt_${id}').value)">💾 Enregistrer</button>`;
+}
+
+function setCaution(id, hasCaution, amount) {
+  saveAll(getAll().map(r => r.id==id ? {...r, hasCaution, caution: hasCaution ? Math.max(0,+amount||0) : 0} : r));
+  toast('🔒 Caution mise à jour');
+  showDetail(id);
+}
+
+function openEditReservation(id) {
+  const r = getAll().find(r=>r.id==id);
+  if (!r) return;
+  document.getElementById('detailModal').innerHTML = `
+    <div class="modal-title"><span>✏️ Modifier la réservation</span><button class="modal-close-btn" onclick="closeDetail()">✕</button></div>
+    <div class="form-group"><label>Nom du client</label><input id="er_name" type="text" value="${esc(r.name)}"/></div>
+    <div class="form-group"><label>Téléphone</label><input id="er_phone" type="text" value="${esc(r.phone)}"/></div>
+    <div class="form-group"><label>Email (optionnel)</label><input id="er_email" type="email" value="${esc(r.email||'')}"/></div>
+    <div class="form-group"><label>Véhicule</label>
+      <select id="er_car">${getVehicles().map(v=>`<option value="${esc(v.name)}" ${v.name===r.car?'selected':''}>${esc(v.name)}</option>`).join('')}
+        ${!getVehicles().some(v=>v.name===r.car)?`<option value="${esc(r.car)}" selected>${esc(r.car)}</option>`:''}
+      </select>
+    </div>
+    <div class="form-group"><label>Lieu de livraison</label><input id="er_city" type="text" value="${esc(r.city||'')}"/></div>
+    <div class="form-group"><label>Date départ</label><input id="er_start" type="date" value="${r.start}"/></div>
+    <div class="form-group"><label>Date retour</label><input id="er_end" type="date" value="${r.end}"/></div>
+    <div class="form-group"><label>Total (MAD)</label><input id="er_total" type="number" min="0" value="${r.total}"/></div>
+    <div class="form-group"><label>Déjà payé (MAD)</label><input id="er_paid" type="number" min="0" value="${r.amountPaid||0}"/></div>
+    <div class="form-group">
+      <label><input id="er_hasCaution" type="checkbox" ${r.hasCaution?'checked':''} onchange="document.getElementById('er_caution_wrap').style.display=this.checked?'':'none'"/> Caution / Garantie prise</label>
+    </div>
+    <div class="form-group" id="er_caution_wrap" style="display:${r.hasCaution?'':'none'}"><label>Montant de la caution (MAD)</label><input id="er_caution" type="number" min="0" value="${r.caution||0}"/></div>
+    <div class="form-group"><label>Statut</label>
+      <select id="er_status">${Object.entries(STATUS).map(([k,s])=>`<option value="${k}" ${r.status===k?'selected':''}>${s.icon} ${statusLabel(k)}</option>`).join('')}</select>
+    </div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="modal-btn-confirm" onclick="submitEditReservation(${id})">💾 Enregistrer</button>
+      <button class="modal-btn-close" onclick="showDetail(${id})">Annuler</button>
+    </div>`;
+}
+
+function submitEditReservation(id) {
+  const v = vid => document.getElementById(vid).value.trim();
+  const start = v('er_start'), end = v('er_end');
+  const days = Math.max(1, Math.round((new Date(end)-new Date(start))/86400000));
+  const total = +v('er_total')||0;
+  const hasCaution = document.getElementById('er_hasCaution').checked;
+  saveAll(getAll().map(r => r.id==id ? {...r,
+    name: v('er_name'), phone: v('er_phone'), email: v('er_email'),
+    car: v('er_car'), city: v('er_city'), start, end, days, total,
+    carPrice: days?Math.round(total/days):total,
+    amountPaid: +v('er_paid')||0,
+    hasCaution, caution: hasCaution ? (+v('er_caution')||0) : 0,
+    status: v('er_status'),
+  } : r));
+  toast('✅ Réservation mise à jour');
+  showDetail(id);
+  renderTable(); renderDashboard();
 }
 
 function closeDetail(e) {
@@ -459,13 +637,68 @@ function renderStats() {
     : '<p style="color:var(--muted);font-size:.82rem">Aucune donnée</p>';
 }
 
+/* ===== FACTURE ===== */
+function downloadInvoice(id) {
+  const r = getAll().find(r=>r.id==id);
+  if (!r) return;
+  const p = paymentInfo(r);
+  const cfg = JSON.parse(localStorage.getItem('md_site_settings') || '{}');
+  const agencyName = cfg.name || 'Chakroun Cars';
+  const isImgLogo = /^(https?:|data:)/.test(cfg.logo || '');
+  const logoHtml = isImgLogo
+    ? `<img src="${cfg.logo}" alt="${esc(agencyName)}" style="height:48px;max-width:200px;object-fit:contain;display:block;margin:0 auto 10px"/>`
+    : '';
+  const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>Facture #${r.id}</title>
+  <style>
+    body{font-family:Arial,sans-serif;padding:40px;color:#111}
+    h1{color:#e63329;text-align:center}
+    table{width:100%;border-collapse:collapse;margin-top:20px}
+    td{padding:8px 0;border-bottom:1px solid #eee}
+    td:first-child{color:#666;width:45%}
+    .total{font-size:1.3rem;font-weight:bold;color:#e63329;margin-top:20px}
+    .badge{display:inline-block;padding:4px 12px;border-radius:100px;font-size:.8rem;font-weight:bold}
+  </style></head><body>
+    ${logoHtml}
+    <h1>${esc(agencyName)} — Facture</h1>
+    <p>Facture N° ${r.id} · ${new Date(r.createdAt).toLocaleDateString('fr-FR')}</p>
+    <table>
+      <tr><td>👤 Client</td><td>${esc(r.name)}</td></tr>
+      <tr><td>📞 Téléphone</td><td>${esc(r.phone)}</td></tr>
+      ${r.email?`<tr><td>✉️ Email</td><td>${esc(r.email)}</td></tr>`:''}
+      <tr><td>📍 Lieu de livraison</td><td>${esc(r.city)||'—'}</td></tr>
+      <tr><td>🚘 Véhicule</td><td>${esc(r.car)}</td></tr>
+      <tr><td>📅 Départ</td><td>${fmt(r.start)}</td></tr>
+      <tr><td>📅 Retour</td><td>${fmt(r.end)}</td></tr>
+      <tr><td>⏱ Durée</td><td>${r.days} jour(s)</td></tr>
+      <tr><td>💵 Prix/jour</td><td>${fmtN(r.carPrice)} MAD</td></tr>
+      <tr><td>💰 Total</td><td>${fmtN(p.total)} MAD</td></tr>
+      <tr><td>✅ Déjà payé</td><td>${fmtN(p.paid)} MAD</td></tr>
+      <tr><td>⏳ Reste à payer</td><td>${fmtN(p.due)} MAD</td></tr>
+      <tr><td>Statut</td><td>${p.full?'Payé complet':'Avance'} · ${statusLabel(r.status)}</td></tr>
+      ${r.hasCaution?`<tr><td>🔒 Caution</td><td>${fmtN(r.caution)} MAD</td></tr>`:''}
+    </table>
+    <p class="total">Total : ${fmtN(p.total)} MAD</p>
+  </body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Facture_${agencyName.replace(/\s+/g,'_')}_${r.id}.html`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast('🧾 Facture téléchargée');
+}
+
 /* ===== WHATSAPP ===== */
 function sendWA(id) {
   const r = getAll().find(r=>r.id==id);
   if (!r) return;
   const phone = (r.phone || '').replace(/\D/g,'');
   const dest  = phone.startsWith('0') ? '212' + phone.slice(1) : phone || WA;
-  const msg = `🚗 *Réservation MarocDrive*\n\n👤 *Nom :* ${r.name}\n📞 *Tél :* ${r.phone}${r.email?'\n✉️ *Email :* '+r.email:''}\n📍 *Lieu :* ${r.city||'—'}\n🚘 *Véhicule :* ${r.car}\n📅 *Départ :* ${fmt(r.start)}\n📅 *Retour :* ${fmt(r.end)}\n⏱ *Durée :* ${r.days} jour${r.days>1?'s':''}\n💰 *Total :* ${fmtN(r.total)} MAD\n${STATUS[r.status].icon} *Statut :* ${STATUS[r.status].label}`;
+  const agencyName = (JSON.parse(localStorage.getItem('md_site_settings') || '{}').name) || 'Chakroun Cars';
+  const msg = `🚗 *Réservation ${agencyName}*\n\n👤 *Nom :* ${r.name}\n📞 *Tél :* ${r.phone}${r.email?'\n✉️ *Email :* '+r.email:''}\n📍 *Lieu :* ${r.city||'—'}\n🚘 *Véhicule :* ${r.car}\n📅 *Départ :* ${fmt(r.start)}\n📅 *Retour :* ${fmt(r.end)}\n⏱ *Durée :* ${r.days} jour${r.days>1?'s':''}\n💰 *Total :* ${fmtN(r.total)} MAD\n${STATUS[r.status].icon} *Statut :* ${STATUS[r.status].label}`;
   window.open(`https://wa.me/${dest}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -532,12 +765,14 @@ function doExport() {
   XLSX.utils.book_append_sheet(WB, ws1, '📊 Résumé');
 
   // ── Réservations ──
-  const hdrs = ['ID','Nom','Téléphone','Email','Véhicule','Ville','Date départ','Date retour','Jours','Total MAD','Statut','Créé le'];
-  const ws2 = XLSX.utils.aoa_to_sheet([hdrs, ...data.map(r=>[
-    r.id, r.name, r.phone, r.email||'', r.car, r.city||'',
-    fmt(r.start), fmt(r.end), num(r.days), num(r.total), sLabel(r.status), fmtDT(r.createdAt)
-  ])]);
-  ws2['!cols']=[{wch:14},{wch:20},{wch:16},{wch:22},{wch:18},{wch:18},{wch:13},{wch:13},{wch:7},{wch:12},{wch:12},{wch:18}];
+  const hdrs = ['ID','Nom','Téléphone','Email','Véhicule','Ville','Date départ','Date retour','Jours','Total MAD','Payé MAD','Reste MAD','Source','Statut','Créé le'];
+  const ws2 = XLSX.utils.aoa_to_sheet([hdrs, ...data.map(r=>{
+    const p = paymentInfo(r);
+    return [r.id, r.name, r.phone, r.email||'', r.car, r.city||'',
+    fmt(r.start), fmt(r.end), num(r.days), num(r.total), p.paid, p.due,
+    r.source==='manual'?'Manuel':'Site web', sLabel(r.status), fmtDT(r.createdAt)];
+  })]);
+  ws2['!cols']=[{wch:14},{wch:20},{wch:16},{wch:22},{wch:18},{wch:18},{wch:13},{wch:13},{wch:7},{wch:12},{wch:10},{wch:10},{wch:10},{wch:12},{wch:18}];
   XLSX.utils.book_append_sheet(WB, ws2, '📋 Réservations');
 
   // ── Par véhicule ──
@@ -565,7 +800,8 @@ function doExport() {
   XLSX.utils.book_append_sheet(WB, ws5, '📅 Par mois');
 
   const pLabel={week:'semaine',month:'mois','3months':'3mois','6months':'6mois',year:'annee',all:'complet'}[period];
-  XLSX.writeFile(WB, `MarocDrive_${pLabel}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  const agencyName = (JSON.parse(localStorage.getItem('md_site_settings') || '{}').name) || 'Chakroun Cars';
+  XLSX.writeFile(WB, `${agencyName.replace(/\s+/g,'_')}_${pLabel}_${new Date().toISOString().slice(0,10)}.xlsx`);
   closeExportModal();
   toast('✅ Fichier Excel téléchargé');
 }
@@ -574,6 +810,10 @@ function doExport() {
 function showTab(tab, el) {
   document.querySelectorAll('.sb-link').forEach(a=>a.classList.remove('active'));
   el.classList.add('active');
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar')?.classList.remove('open');
+    document.getElementById('sidebarBackdrop')?.classList.remove('show');
+  }
   ['Dashboard','Reservations','Stats','Chats'].forEach(t=>{
     const el2 = document.getElementById('tab'+t);
     if (el2) el2.style.display = 'none';
@@ -583,7 +823,7 @@ function showTab(tab, el) {
   if (elTab) elTab.style.display = 'block';
   window.currentAdminTab = tab;
   const L = PANEL_LANGS[localStorage.getItem('md_panel_lang') || 'fr'];
-  document.getElementById('pageTitle').textContent = L.titles[tab] || tab;
+  document.getElementById('pageTitle').textContent = (L.titles && L.titles[tab]) || tab;
   if (tab==='reservations') renderTable();
   if (tab==='stats') renderStats();
   if (tab==='chats') { document.documentElement.scrollTop = 0; document.body.scrollTop = 0; renderChats(); markChatsSeen(); }
@@ -608,24 +848,6 @@ function updateChatToggleUI(active) {
 function initChatToggle() {
   const cfg = JSON.parse(localStorage.getItem('md_chat_config')||'{"active":true}');
   updateChatToggleUI(cfg.active !== false);
-}
-
-function toggleCRM() {
-  const cfg = JSON.parse(localStorage.getItem('md_site_settings')||'{}');
-  cfg.crmEnabled = !cfg.crmEnabled;
-  localStorage.setItem('md_site_settings', JSON.stringify(cfg));
-  updateCRMToggleUI(cfg.crmEnabled);
-  toast(cfg.crmEnabled ? '🗂️ CRM activé' : '🗂️ CRM désactivé');
-}
-function updateCRMToggleUI(active) {
-  const track = document.getElementById('crmToggleTrack');
-  const link  = document.getElementById('crmNavLink');
-  if (track) track.classList.toggle('on', active);
-  if (link)  link.style.display = active ? '' : 'none';
-}
-function initCRMToggle() {
-  const cfg = JSON.parse(localStorage.getItem('md_site_settings')||'{}');
-  updateCRMToggleUI(!!cfg.crmEnabled);
 }
 
 /* ===== CHAT NOTIFICATIONS ===== */
@@ -698,10 +920,10 @@ function factoryReset() {
 
 /* ===== INIT ===== */
 function init() {
+  applyAdminBranding();
   renderDashboard();
   renderNotif();
   initChatToggle();
-  initCRMToggle();
   _initBaseline();
   startRealtimeSync();
   requestNotifPermission();
@@ -711,6 +933,7 @@ function init() {
   window.addEventListener('storage', e => {
     if (e.key === 'md_reservations') checkNewReservations();
     if (e.key === 'md_chat_conversations') checkNewChats(true);
+    if (e.key === 'md_site_settings') applyAdminBranding();
   });
 
   // detect new reservations same-tab (when admin itself saves)
@@ -720,6 +943,16 @@ function init() {
     if (key === 'md_reservations') checkNewReservations();
   };
 }
+
+/* ===== VEHICLES (read-only helpers used by the reservation form; management lives in CRM System) ===== */
+function getVehicles() { return JSON.parse(localStorage.getItem('md_vehicles')||'[]'); }
+
+function vehicleReservations(name) {
+  return getAll().filter(r => r.car===name && r.status!=='cancelled' && r.start && r.end)
+    .sort((a,b)=> new Date(a.start) - new Date(b.start));
+}
+
+const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 if (sessionStorage.getItem('md_admin')==='1') {
   document.getElementById('loginScreen').style.display='none';

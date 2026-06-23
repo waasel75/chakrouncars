@@ -1,5 +1,5 @@
 'use strict';
-/* MarocDrive ChatBot v3 — n8n + ChatGPT, auto-context */
+/* Chakroun Cars ChatBot v3 — n8n + ChatGPT, auto-context */
 
 const CHAT_KEY    = 'md_chat_conversations';
 const CHAT_CFG    = 'md_chat_config';
@@ -28,7 +28,7 @@ function buildContext() {
   const sc = typeof SITE !== 'undefined' ? SITE : {};
   const phone = s.phone   || sc.phone    || '+212 634 829 085';
   const wa    = s.wa      || sc.whatsapp || '212634829085';
-  const name  = s.name    || sc.name     || 'MarocDrive';
+  const name  = s.name    || sc.name     || 'Chakroun Cars';
   const addr  = s.address || '';
 
   // Booking config (mode, cities, airports, pickup address)
@@ -73,6 +73,8 @@ function buildChatWidget() {
   if (cfg.active === false) return;
   if (document.getElementById('chatWidget')) return;
 
+  const siteName = (JSON.parse(localStorage.getItem('md_site_settings') || '{}').name) || 'Chakroun Cars';
+
   const w = document.createElement('div');
   w.id = 'chatWidget';
   w.innerHTML = `
@@ -86,7 +88,7 @@ function buildChatWidget() {
         <div class="chat-header-left">
           <div class="chat-avatar">🤖</div>
           <div>
-            <div class="chat-agent-name">${cfg.agentName || 'Assistant MarocDrive'}</div>
+            <div class="chat-agent-name">${cfg.agentName || `Assistant ${siteName}`}</div>
             <div class="chat-status"><span class="chat-dot"></span> En ligne</div>
           </div>
         </div>
@@ -103,7 +105,7 @@ function buildChatWidget() {
   document.body.appendChild(w);
   chatSession = { id: Date.now(), startedAt: new Date().toISOString(), messages: [] };
   setTimeout(() => {
-    addBotMsg(cfg.welcomeMsg || 'Bonjour ! 😊 Je suis votre assistant **MarocDrive**. Comment puis-je vous aider ?');
+    addBotMsg(cfg.welcomeMsg || `Bonjour ! 😊 Je suis votre assistant **${siteName}**. Comment puis-je vous aider ?`);
     document.getElementById('chatNotif').style.display = 'flex';
   }, 1800);
 }

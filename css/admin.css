@@ -212,8 +212,8 @@ a{text-decoration:none;color:inherit}
 .filters select option{background:var(--dark2)}
 
 /* TABLE */
-.table-wrap{background:var(--dark2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-table{width:100%;border-collapse:collapse}
+.table-wrap{background:var(--dark2);border:1px solid var(--border);border-radius:var(--r);overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
 thead tr{background:var(--dark3)}
 th{padding:11px 14px;text-align:left;font-size:.7rem;font-weight:700;color:var(--muted);
   text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
@@ -308,17 +308,24 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
 /* RESPONSIVE */
 @media(max-width:1024px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:150}
+.sidebar-backdrop.show{display:block}
 @media(max-width:768px){
   .sidebar{position:fixed;left:-230px;top:0;bottom:0;z-index:200;transition:left var(--tr)}
   .sidebar.open{left:0}
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
   .status-bars{grid-template-columns:repeat(2,1fr)}
   .dash-row{flex-direction:column}
-  .tab-content{padding:16px}
+  .tab-content{padding:14px}
+  .filters{gap:8px}
+  .filters input,.filters select,.filters button{width:100%;min-width:0;flex:1 1 100%}
+  .modal{padding:18px;width:94vw}
+  #vehGrid,#vidGrid{grid-template-columns:1fr!important}
 }
 @media(max-width:500px){
   .kpi-grid{grid-template-columns:1fr 1fr}
   table{font-size:.75rem}th,td{padding:8px 8px}
+  .login-box{padding:24px 18px;width:94vw}
 }
 
 /* ===== BELL NOTIFICATION ===== */

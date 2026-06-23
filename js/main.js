@@ -8,7 +8,7 @@ function getSiteConfig() {
     wa: (r => r.startsWith('0') ? '212' + r.slice(1) : r)((cfg.wa || '212634829085').replace(/\D/g,'')),
     social: cfg.social || {},
     mapsLink: cfg.mapsLink || '',
-    name: cfg.name || 'MarocDrive',
+    name: cfg.name || 'Chakroun Cars',
     logo: cfg.logo || '',
     aboutImages: (cfg.aboutImages || []).filter(Boolean),
     heroBg: cfg.heroBg || '',
@@ -63,6 +63,29 @@ function applyBranding(cfg) {
     if (icon) icon.innerHTML = isImg ? `<img src="${cfg.logo}" style="max-height:40px;max-width:160px;width:auto;height:auto;object-fit:contain;vertical-align:middle;display:block;"/>` : (cfg.logo || '🚗');
     if (text) text.innerHTML = textHtml;
   });
+
+  // Replace any leftover "Chakroun Cars" occurrences in title/meta/alt/aria with the configured agency name
+  const name = cfg.name;
+  if (document.title.includes('Chakroun Cars')) document.title = document.title.replace(/Chakroun Cars/g, name);
+  document.querySelectorAll('meta[name="author"], meta[property="og:title"], meta[property="og:site_name"], meta[name="twitter:title"]').forEach(m => {
+    if (m.content.includes('Chakroun Cars')) m.content = m.content.replace(/Chakroun Cars/g, name);
+  });
+  document.querySelectorAll('[alt], [aria-label]').forEach(el => {
+    if (el.alt && el.alt.includes('Chakroun Cars')) el.alt = el.alt.replace(/Chakroun Cars/g, name);
+    if (el.getAttribute('aria-label')?.includes('Chakroun Cars')) el.setAttribute('aria-label', el.getAttribute('aria-label').replace(/Chakroun Cars/g, name));
+  });
+  const ld = document.querySelector('script[type="application/ld+json"]');
+  if (ld) { try {
+    const data = JSON.parse(ld.textContent);
+    if (data.name === 'Chakroun Cars') { data.name = name; ld.textContent = JSON.stringify(data); }
+  } catch(e) {} }
+
+  // sweep any remaining "Chakroun Cars" text nodes (about text, footer copyright, testimonials, etc.)
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const toFix = [];
+  let node;
+  while ((node = walker.nextNode())) { if (node.nodeValue.includes('Chakroun Cars')) toFix.push(node); }
+  toFix.forEach(n => { n.nodeValue = n.nodeValue.replace(/Chakroun Cars/g, name); });
 }
 
 function applyBookingConfig() {
@@ -188,14 +211,14 @@ const LANGS = {
     testimonials: { badge:'Avis Clients', title:'Ce que disent nos clients' },
     about: {
       badge: 'À propos de nous', title: 'Leader de la location de voitures au Maroc',
-      p1: 'Depuis 2016, MarocDrive accompagne les voyageurs et les professionnels dans leurs déplacements au Maroc. Notre flotte de plus de 500 véhicules couvre toutes les grandes villes du royaume.',
+      p1: 'Depuis 2016, Chakroun Cars accompagne les voyageurs et les professionnels dans leurs déplacements au Maroc. Notre flotte de plus de 500 véhicules couvre toutes les grandes villes du royaume.',
       p2: 'Notre mission : vous offrir une expérience de location sans stress, transparente et mémorable.',
       list: ['Prix toujours affichés, sans frais cachés','Véhicules récents < 3 ans','Kilomètres illimités inclus','Assistance routière 24/7'],
       cta: 'Réserver maintenant',
     },
     contact: {
       badge: 'Contactez-nous', title: 'Nous sommes là pour vous',
-      items: [['📞','Téléphone / WhatsApp','+212 6XX XXX XXX'],['✉️','Email','contact@marocdrive.ma'],['📍','Adresse','Casablanca, Maroc']],
+      items: [['📞','Téléphone / WhatsApp','+212 6XX XXX XXX'],['✉️','Email','contact@chakrouncars.com'],['📍','Adresse','Casablanca, Maroc']],
       form: { fname:'Prénom', lname:'Nom', email:'Email', phone:'Téléphone', msg:'Message',
         fnamePh:'Mohammed', lnamePh:'Alami', emailPh:'vous@example.com', phonePh:'+212 6XX XXX XXX', msgPh:'Votre message...', send:'Envoyer le message' },
     },
@@ -203,7 +226,7 @@ const LANGS = {
       navLinks:['Notre Flotte','Comment ça marche','À propos','Contact'],
       cityLinks:['Casablanca','Marrakech','Agadir','Fès','Tanger'],
       legalLinks:['Conditions générales','Politique de confidentialité','Mentions légales'],
-      copy:'© 2026 MarocDrive. Tous droits réservés.',
+      copy:'© 2026 Chakroun Cars. Tous droits réservés.',
     },
     toast: { search:'🔍 Recherche en cours… Redirection vers les résultats.', contact:"✅ Message envoyé ! Nous vous répondrons dans les 24h.", book:(n)=>`✅ "${n}" sélectionné ! Complétez votre réservation ci-dessus.` },
     cities: ['Tétouan','Martil',"M'Diq",'Fnideq','Tanger','Chefchaouen','Rabat','Casablanca','Marrakech','✈️ Aéroport Tanger Ibn Batouta','✈️ Aéroport Casablanca CMN','✈️ Aéroport Marrakech RAK','🏨 Hôtel / Riad (préciser à la réservation)'],
@@ -247,14 +270,14 @@ const LANGS = {
     testimonials: { badge:'Client Reviews', title:'What our clients say' },
     about: {
       badge: 'About Us', title: 'Morocco\'s leading car rental company',
-      p1: 'Since 2016, MarocDrive has been supporting travellers and professionals in their journeys across Morocco. Our fleet of 500+ vehicles covers all major cities in the kingdom.',
+      p1: 'Since 2016, Chakroun Cars has been supporting travellers and professionals in their journeys across Morocco. Our fleet of 500+ vehicles covers all major cities in the kingdom.',
       p2: 'Our mission: to offer you a stress-free, transparent and memorable rental experience.',
       list: ['Prices always shown, no hidden fees','Recent vehicles < 3 years old','Unlimited mileage included','24/7 roadside assistance'],
       cta: 'Book Now',
     },
     contact: {
       badge: 'Contact Us', title: 'We\'re here for you',
-      items: [['📞','Phone / WhatsApp','+212 6XX XXX XXX'],['✉️','Email','contact@marocdrive.ma'],['📍','Address','Casablanca, Morocco']],
+      items: [['📞','Phone / WhatsApp','+212 6XX XXX XXX'],['✉️','Email','contact@chakrouncars.com'],['📍','Address','Casablanca, Morocco']],
       form: { fname:'First Name', lname:'Last Name', email:'Email', phone:'Phone', msg:'Message',
         fnamePh:'Mohammed', lnamePh:'Alami', emailPh:'you@example.com', phonePh:'+212 6XX XXX XXX', msgPh:'Your message...', send:'Send Message' },
     },
@@ -262,7 +285,7 @@ const LANGS = {
       navLinks:['Our Fleet','How it works','About','Contact'],
       cityLinks:['Casablanca','Marrakech','Agadir','Fès','Tangier'],
       legalLinks:['Terms & Conditions','Privacy Policy','Legal Notice'],
-      copy:'© 2026 MarocDrive. All rights reserved.',
+      copy:'© 2026 Chakroun Cars. All rights reserved.',
     },
     toast: { search:'🔍 Searching… Redirecting to results.', contact:'✅ Message sent! We\'ll reply within 24h.', book:(n)=>`✅ "${n}" selected! Complete your booking above.` },
     cities: ['Casablanca — CMN Airport','Marrakech — RAK Airport','Agadir — AGA Airport','Fès — FEZ Airport','Tangier — TNG Airport'],
@@ -306,14 +329,14 @@ const LANGS = {
     testimonials: { badge:'Opiniones', title:'Lo que dicen nuestros clientes' },
     about: {
       badge: 'Sobre nosotros', title: 'Líder del alquiler de coches en Marruecos',
-      p1: 'Desde 2016, MarocDrive acompaña a viajeros y profesionales en sus desplazamientos por Marruecos. Nuestra flota de más de 500 vehículos cubre todas las grandes ciudades del reino.',
+      p1: 'Desde 2016, Chakroun Cars acompaña a viajeros y profesionales en sus desplazamientos por Marruecos. Nuestra flota de más de 500 vehículos cubre todas las grandes ciudades del reino.',
       p2: 'Nuestra misión: ofrecerle una experiencia de alquiler sin estrés, transparente y memorable.',
       list: ['Precios siempre visibles, sin cargos ocultos','Vehículos recientes < 3 años','Kilómetros ilimitados incluidos','Asistencia en carretera 24/7'],
       cta: 'Reservar ahora',
     },
     contact: {
       badge: 'Contáctanos', title: 'Estamos aquí para ti',
-      items: [['📞','Teléfono / WhatsApp','+212 6XX XXX XXX'],['✉️','Email','contact@marocdrive.ma'],['📍','Dirección','Casablanca, Marruecos']],
+      items: [['📞','Teléfono / WhatsApp','+212 6XX XXX XXX'],['✉️','Email','contact@chakrouncars.com'],['📍','Dirección','Casablanca, Marruecos']],
       form: { fname:'Nombre', lname:'Apellido', email:'Email', phone:'Teléfono', msg:'Mensaje',
         fnamePh:'Mohammed', lnamePh:'Alami', emailPh:'tu@ejemplo.com', phonePh:'+212 6XX XXX XXX', msgPh:'Tu mensaje...', send:'Enviar mensaje' },
     },
@@ -321,7 +344,7 @@ const LANGS = {
       navLinks:['Nuestra Flota','Cómo funciona','Nosotros','Contacto'],
       cityLinks:['Casablanca','Marrakech','Agadir','Fès','Tánger'],
       legalLinks:['Términos y condiciones','Política de privacidad','Aviso legal'],
-      copy:'© 2026 MarocDrive. Todos los derechos reservados.',
+      copy:'© 2026 Chakroun Cars. Todos los derechos reservados.',
     },
     toast: { search:'🔍 Buscando… Redirigiendo a los resultados.', contact:'✅ ¡Mensaje enviado! Te responderemos en 24h.', book:(n)=>`✅ "${n}" seleccionado. ¡Completa tu reserva arriba!` },
     cities: ['Casablanca — Aeropuerto CMN','Marrakech — Aeropuerto RAK','Agadir — Aeropuerto AGA','Fès — Aeropuerto FEZ','Tánger — Aeropuerto TNG'],
@@ -365,14 +388,14 @@ const LANGS = {
     testimonials: { badge:'آراء العملاء', title:'ما يقوله عملاؤنا' },
     about: {
       badge: 'من نحن', title: 'الرائد في تأجير السيارات بالمغرب',
-      p1: 'منذ عام 2016، يرافق MarocDrive المسافرين والمهنيين في تنقلاتهم عبر المغرب. يغطي أسطولنا المؤلف من أكثر من 500 مركبة جميع المدن الكبرى في المملكة.',
+      p1: 'منذ عام 2016، يرافق Chakroun Cars المسافرين والمهنيين في تنقلاتهم عبر المغرب. يغطي أسطولنا المؤلف من أكثر من 500 مركبة جميع المدن الكبرى في المملكة.',
       p2: 'مهمتنا: تقديم تجربة إيجار خالية من التوتر، شفافة ولا تُنسى.',
       list: ['أسعار واضحة دائماً، بدون رسوم خفية','مركبات حديثة أقل من 3 سنوات','كيلومترات غير محدودة مشمولة','مساعدة على الطريق 24/7'],
       cta: 'احجز الآن',
     },
     contact: {
       badge: 'اتصل بنا', title: 'نحن هنا من أجلك',
-      items: [['📞','هاتف / واتساب','+212 6XX XXX XXX'],['✉️','البريد الإلكتروني','contact@marocdrive.ma'],['📍','العنوان','الدار البيضاء، المغرب']],
+      items: [['📞','هاتف / واتساب','+212 6XX XXX XXX'],['✉️','البريد الإلكتروني','contact@chakrouncars.com'],['📍','العنوان','الدار البيضاء، المغرب']],
       form: { fname:'الاسم', lname:'اللقب', email:'البريد الإلكتروني', phone:'الهاتف', msg:'الرسالة',
         fnamePh:'محمد', lnamePh:'العلمي', emailPh:'أنت@مثال.com', phonePh:'+212 6XX XXX XXX', msgPh:'رسالتك...', send:'إرسال الرسالة' },
     },
@@ -380,7 +403,7 @@ const LANGS = {
       navLinks:['أسطولنا','كيف يعمل','من نحن','اتصل بنا'],
       cityLinks:['الدار البيضاء','مراكش','أكادير','فاس','طنجة'],
       legalLinks:['الشروط العامة','سياسة الخصوصية','الإشعار القانوني'],
-      copy:'© 2026 MarocDrive. جميع الحقوق محفوظة.',
+      copy:'© 2026 Chakroun Cars. جميع الحقوق محفوظة.',
     },
     toast: { search:'🔍 جارٍ البحث… إعادة التوجيه إلى النتائج.', contact:'✅ تم إرسال الرسالة! سنرد خلال 24 ساعة.', book:(n)=>`✅ تم اختيار "${n}"! أكمل حجزك أعلاه.` },
     cities: ['الدار البيضاء — مطار CMN','مراكش — مطار RAK','أكادير — مطار AGA','فاس — مطار FEZ','طنجة — مطار TNG'],
@@ -424,12 +447,12 @@ const CAR_BADGES = {
 };
 
 const TESTIMONIALS_DATA = [
-  { name:'Karim B.', city:{ fr:'Casablanca', en:'Casablanca', es:'Casablanca', ar:'الدار البيضاء' }, stars:5, text:{ fr:'Service impeccable ! La voiture était propre et livrée à l\'aéroport à l\'heure. Je recommande vivement MarocDrive.', en:'Impeccable service! The car was clean and delivered to the airport on time. I highly recommend MarocDrive.', es:'¡Servicio impecable! El coche estaba limpio y entregado en el aeropuerto a tiempo. Recomiendo MarocDrive.', ar:'خدمة لا تشوبها شائبة! كانت السيارة نظيفة وسُلِّمت في المطار في الوقت المحدد. أوصي بـ MarocDrive.' } },
+  { name:'Karim B.', city:{ fr:'Casablanca', en:'Casablanca', es:'Casablanca', ar:'الدار البيضاء' }, stars:5, text:{ fr:'Service impeccable ! La voiture était propre et livrée à l\'aéroport à l\'heure. Je recommande vivement Chakroun Cars.', en:'Impeccable service! The car was clean and delivered to the airport on time. I highly recommend Chakroun Cars.', es:'¡Servicio impecable! El coche estaba limpio y entregado en el aeropuerto a tiempo. Recomiendo Chakroun Cars.', ar:'خدمة لا تشوبها شائبة! كانت السيارة نظيفة وسُلِّمت في المطار في الوقت المحدد. أوصي بـ Chakroun Cars.' } },
   { name:'Sophie M.', city:{ fr:'Paris → Marrakech', en:'Paris → Marrakech', es:'París → Marrakech', ar:'باريس ← مراكش' }, stars:5, text:{ fr:'J\'ai loué un SUV pour 10 jours. Excellent état, prix honnête, l\'équipe m\'a aidée à chaque étape.', en:'I rented an SUV for 10 days. Excellent condition, fair price, the team helped me every step of the way.', es:'Alquilé un SUV por 10 días. Excelente estado, precio justo, el equipo me ayudó en cada paso.', ar:'استأجرت سيارة SUV لمدة 10 أيام. حالة ممتازة، سعر عادل، الفريق ساعدني في كل خطوة.' } },
   { name:'Ahmed R.', city:{ fr:'Agadir', en:'Agadir', es:'Agadir', ar:'أكادير' }, stars:5, text:{ fr:'Déjà 3 fois que je loue chez eux. Tarifs compétitifs, véhicules récents, le support WhatsApp est ultra-réactif.', en:'Already rented 3 times. Competitive rates, recent vehicles, WhatsApp support is ultra-responsive.', es:'Ya he alquilado 3 veces. Tarifas competitivas, vehículos recientes, el soporte de WhatsApp es muy rápido.', ar:'ثلاث مرات تعاملت معهم. أسعار تنافسية، مركبات حديثة، ودعم الواتساب سريع الاستجابة جداً.' } },
   { name:'Fatima Z.', city:{ fr:'Fès', en:'Fès', es:'Fès', ar:'فاس' }, stars:5, text:{ fr:'Réservation facile en ligne, confirmation immédiate. La voiture m\'attendait à la sortie de l\'aéroport.', en:'Easy online booking, instant confirmation. The car was waiting for me at the airport exit.', es:'Reserva fácil en línea, confirmación inmediata. El coche me esperaba a la salida del aeropuerto.', ar:'حجز سهل عبر الإنترنت، تأكيد فوري. كانت السيارة تنتظرني عند مخرج المطار.' } },
   { name:'Lucas D.', city:{ fr:'Lyon → Tanger', en:'Lyon → Tangier', es:'Lyon → Tánger', ar:'ليون ← طنجة' }, stars:4, text:{ fr:'Très bonne expérience globale. Le personnel parle français, la voiture était confortable et bien entretenue.', en:'Very good overall experience. The staff speaks French, the car was comfortable and well maintained.', es:'Muy buena experiencia en general. El personal habla francés, el coche era cómodo y bien mantenido.', ar:'تجربة إجمالية جيدة جداً. الموظفون يتحدثون العربية، والسيارة كانت مريحة وصيانتها جيدة.' } },
-  { name:'Nadia H.', city:{ fr:'Casablanca', en:'Casablanca', es:'Casablanca', ar:'الدار البيضاء' }, stars:5, text:{ fr:'Prix imbattables ! J\'ai comparé 5 agences et MarocDrive était la meilleure option. Assurance incluse sans frais cachés.', en:'Unbeatable prices! I compared 5 agencies and MarocDrive was the best option. Insurance included, no hidden fees.', es:'¡Precios imbatibles! Comparé 5 agencias y MarocDrive fue la mejor opción. Seguro incluido sin cargos ocultos.', ar:'أسعار لا تُقاوم! قارنت 5 وكالات وكانت MarocDrive الخيار الأفضل. التأمين مشمول بدون رسوم خفية.' } },
+  { name:'Nadia H.', city:{ fr:'Casablanca', en:'Casablanca', es:'Casablanca', ar:'الدار البيضاء' }, stars:5, text:{ fr:'Prix imbattables ! J\'ai comparé 5 agences et Chakroun Cars était la meilleure option. Assurance incluse sans frais cachés.', en:'Unbeatable prices! I compared 5 agencies and Chakroun Cars was the best option. Insurance included, no hidden fees.', es:'¡Precios imbatibles! Comparé 5 agencias y Chakroun Cars fue la mejor opción. Seguro incluido sin cargos ocultos.', ar:'أسعار لا تُقاوم! قارنت 5 وكالات وكانت Chakroun Cars الخيار الأفضل. التأمين مشمول بدون رسوم خفية.' } },
 ];
 
 /* ===== STATE ===== */
@@ -726,7 +749,7 @@ function renderCars(filter) {
     card.className = 'car-card' + (available ? '' : ' car-unavailable');
     card.innerHTML = `
       <div class="car-img" ${totalPhotos > 1 ? `onclick="openPhotoModal('${car.name.replace(/'/g,"\\'")}')" style="cursor:pointer"` : ''}>
-        ${photo ? `<img src="${photo}" alt="${car.name}" style="width:100%;height:100%;object-fit:cover;border-radius:12px 12px 0 0;" onerror="this.outerHTML='<span>${car.emoji}</span>'"/>` : `<span>${car.emoji}</span>`}
+        ${photo ? `<img src="${photo}" alt="${car.name}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;border-radius:12px 12px 0 0;" onerror="this.outerHTML='<span>${car.emoji}</span>'"/>` : `<span>${car.emoji}</span>`}
         ${!available
           ? `<span class="car-badge avail-badge">❌ Non disponible</span>`
           : offer
@@ -973,7 +996,8 @@ function buildConfirmation() {
   `;
 
   // Build WhatsApp message
-  const msg = `🚗 *Nouvelle Réservation — MarocDrive*
+  const siteName = getSiteConfig().name;
+  const msg = `🚗 *Nouvelle Réservation — ${siteName}*
 
 👤 *Nom :* ${name}
 📞 *Téléphone :* ${phone}${email ? `\n✉️ *Email :* ${email}` : ''}
@@ -984,12 +1008,13 @@ function buildConfirmation() {
 ⏱ *Durée :* ${days} jour${days > 1 ? 's' : ''}
 💰 *Total :* ${total.toLocaleString('fr-FR')} MAD
 
-_Envoyé depuis le site MarocDrive_`;
+_Envoyé depuis le site ${siteName}_`;
 
   const waUrl = `https://wa.me/${getSiteConfig().wa}?text=` + encodeURIComponent(msg);
 
   saveReservation({ id: Date.now(), car: activeCarData.name, carPrice: activeCarData.price,
-    name, phone, email, city, start: s, end: e, days, total, status:'pending', createdAt: new Date().toISOString() });
+    name, phone, email, city, start: s, end: e, days, total, status:'pending', createdAt: new Date().toISOString(),
+    source: 'web', amountPaid: 0 });
 
   const waBtn = document.getElementById('confirmWABtn');
   if (waBtn) waBtn.href = waUrl;
@@ -1021,7 +1046,7 @@ function openPhotoModal(carName) {
           <img id="photoModalMainImg" src="${allPhotos[0]}" alt="${car.name}"/>
         </div>
         <div class="photo-modal-side">
-          ${allPhotos.map((p, i) => `<img src="${p}" class="photo-thumb ${i===0?'active':''}" onclick="switchPhoto('${p}',this)" alt=""/>`).join('')}
+          ${allPhotos.map((p, i) => `<img src="${p}" loading="lazy" decoding="async" class="photo-thumb ${i===0?'active':''}" onclick="switchPhoto('${p}',this)" alt=""/>`).join('')}
         </div>
       </div>
     </div>`;

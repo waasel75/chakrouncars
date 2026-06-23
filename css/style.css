@@ -896,7 +896,7 @@ input, select, textarea, button { font-family: inherit; }
 }
 .car-price { display: flex; flex-direction: column; }
 .price-num { font-size: 1.4rem; font-weight: 800; color: var(--white); }
-.price-num span { color: var(--red); }
+.price-num span { color: var(--white); }
 .price-label { font-size: 0.72rem; color: var(--text-muted); }
 
 .car-actions {
@@ -1045,7 +1045,7 @@ input, select, textarea, button { font-family: inherit; }
 .offer-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 3px; }
 .offer-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
 .offer-target { font-size: 0.75rem; color: var(--text-muted); }
-.price-original { font-size: 0.85rem; color: var(--text-muted); text-decoration: line-through; display: block; }
+.price-original { font-size: 0.85rem; color: var(--red); text-decoration: line-through; display: block; }
 .price-offer span { color: #22c55e !important; }
 .car-badge.offer-badge-card { background: var(--red); color: #fff; }
 

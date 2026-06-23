@@ -1,4 +1,0 @@
-[[headers]]
-  for = "/js/*"
-  [headers.values]
-    Cache-Control = "no-cache, must-revalidate"
