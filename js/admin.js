@@ -14,7 +14,7 @@ const STATUS = {
 function applyAdminBranding() {
   const cfg = JSON.parse(localStorage.getItem('md_site_settings') || '{}');
   const name = cfg.name || 'Chakroun Cars';
-  const isImg = /^(https?:|data:)/.test(cfg.logo || '');
+  const isImg = /^(https?:|data:)/.test(cfg.logo || '') || /\.(png|jpe?g|svg|webp|gif)$/i.test(cfg.logo || '');
   const icon = isImg ? `<img src="${cfg.logo}" alt="" style="height:1.2em;vertical-align:middle;object-fit:contain"/>` : (cfg.logo || '🚗');
   const words = name.trim().split(' ');
   const last = words.pop();

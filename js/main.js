@@ -57,12 +57,17 @@ function applyBranding(cfg) {
   const words = cfg.name.trim().split(' ');
   const last = words.pop();
   const textHtml = (words.length ? words.join(' ') + ' ' : '') + `<strong>${last}</strong>`;
-  const isImg = /^(https?:|data:)/.test(cfg.logo);
+  const isImg = /^(https?:|data:)/.test(cfg.logo) || /\.(png|jpe?g|svg|webp|gif)$/i.test(cfg.logo);
   ['Header','Footer'].forEach(pos => {
     const icon = document.getElementById('logoIcon'+pos);
     const text = document.getElementById('logoText'+pos);
-    if (icon) icon.innerHTML = isImg ? `<img src="${cfg.logo}" style="max-height:40px;max-width:160px;width:auto;height:auto;object-fit:contain;vertical-align:middle;display:block;"/>` : (cfg.logo || '🚗');
-    if (text) text.innerHTML = textHtml;
+    if (isImg) {
+      if (icon) icon.innerHTML = `<img src="${cfg.logo}" alt="${cfg.name}" style="max-height:52px;max-width:220px;width:auto;height:auto;object-fit:contain;vertical-align:middle;display:block;"/>`;
+      if (text) text.innerHTML = '';            // the logo image already contains the name
+    } else {
+      if (icon) icon.innerHTML = cfg.logo || '🚗';
+      if (text) text.innerHTML = textHtml;
+    }
   });
 
   // Replace any leftover "Chakroun Cars" occurrences in title/meta/alt/aria with the configured agency name

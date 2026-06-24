@@ -15,7 +15,7 @@ const SITE = {
   // Pour un logo image: mettez le chemin vers le fichier, ex: 'images/logo.png'
   // (placez votre image dans le dossier images/). Le logo apparaît automatiquement
   // dans l'en-tête et le pied de page. Formats: png, jpg, svg, webp.
-  logo:      '',
+  logo:      'images/logo.png',
 
   // --- Supabase (backend) ---
   // Créez votre projet sur https://supabase.com → New project
