@@ -59,6 +59,15 @@ function applyBranding(cfg) {
   const textHtml = (words.length ? words.join(' ') + ' ' : '') + `<strong>${last}</strong>`;
   const isImg = /^(https?:|data:)/.test(cfg.logo) || /\.(png|jpe?g|svg|webp|gif)$/i.test(cfg.logo);
   ['Header','Footer'].forEach(pos => {
+    // The logo <img> is hard-coded in the HTML so it paints instantly (no JS
+    // dependency, no flash). Only swap the src when the configured logo really
+    // differs (e.g. admin uploaded a custom one) — this prevents the default
+    // logo from re-rendering when the Supabase sync fires ~2s after load.
+    const img = document.getElementById('logoImg'+pos);
+    if (img) {
+      if (isImg && img.getAttribute('src') !== cfg.logo) img.src = cfg.logo;
+      return;
+    }
     const icon = document.getElementById('logoIcon'+pos);
     const text = document.getElementById('logoText'+pos);
     if (isImg) {

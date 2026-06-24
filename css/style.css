@@ -128,6 +128,8 @@ input, select, textarea, button { font-family: inherit; }
 }
 .logo-icon { font-size: 1.4rem; }
 .logo strong { color: var(--red); }
+.logo-img { height: 46px; width: auto; display: block; }
+@media (max-width: 600px) { .logo-img { height: 38px; } }
 
 .nav-links {
   display: flex;
