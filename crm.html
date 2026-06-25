@@ -145,6 +145,11 @@
             <option value="completed">🏁 Terminé</option>
             <option value="cancelled">❌ Annulé</option>
           </select>
+          <select class="crm-filter" onchange="_resSource=this.value;renderReservations()">
+            <option value="">Toutes provenances</option>
+            <option value="web">🌐 Site web</option>
+            <option value="manual">📞 Manuel</option>
+          </select>
           <button class="crm-btn secondary" onclick="syncNow().then(()=>{renderCurrent();toast('🔄 Données mises à jour')})">🔄 Sync</button>
           <button class="crm-btn" onclick="openManualModal()">➕ Réservation manuelle</button>
         </div>
@@ -158,6 +163,7 @@
                 <th>Dates</th>
                 <th>Durée</th>
                 <th>Total</th>
+                <th>Provenance</th>
                 <th>Statut</th>
                 <th>Actions</th>
               </tr>

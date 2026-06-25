@@ -149,6 +149,14 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 .badge-completed{ background: rgba(67,97,238,.15);  color: var(--blue); }
 .badge-cancelled{ background: rgba(230,57,70,.15);  color: var(--red); }
 
+/* ── INLINE STATUS SELECT (contrôle total du statut) ── */
+.crm-status-select {
+  background: var(--card); border: 1.5px solid var(--border); border-radius: 20px;
+  padding: 4px 8px; font-size: .72rem; font-weight: 700; cursor: pointer; outline: none;
+  max-width: 150px;
+}
+.crm-status-select option { background: var(--card); color: var(--text); font-weight: 600; }
+
 /* ── ACT BTNS ── */
 .acts { display: flex; gap: 4px; flex-wrap: wrap; }
 .ab { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 9px; font-size: .78rem; cursor: pointer; color: var(--text); transition: background .15s; }

@@ -15,6 +15,24 @@ const ST = {
   cancelled:       { label:'Annulé',            color:'var(--red)',    icon:'❌' },
 };
 
+/* ── SOURCE (provenance de la réservation) ── */
+const SRC = {
+  web:    { label:'Site web', short:'Site',   icon:'🌐', color:'var(--blue)'   },
+  manual: { label:'Manuel',   short:'Manuel', icon:'📞', color:'var(--purple)' },
+};
+function srcInfo(r)  { return SRC[r && r.source] || { label:'Inconnu', short:'—', icon:'❓', color:'var(--muted)' }; }
+function srcBadge(r) { const s = srcInfo(r); return `<span class="badge" style="background:${s.color}1f;color:${s.color}">${s.icon} ${s.short}</span>`; }
+
+/* Sélecteur de statut inline : contrôle total sur n'importe quelle réservation
+   (site web ou manuelle) directement depuis le tableau / les listes. */
+function statusSelect(r) {
+  const c = ST[r.status]?.color || 'var(--muted)';
+  return `<select class="crm-status-select" style="border-color:${c};color:${c}" `
+    + `onchange="changeStatus(${r.id}, this.value)" onclick="event.stopPropagation()">`
+    + Object.entries(ST).map(([k,s]) => `<option value="${k}" ${r.status===k?'selected':''}>${s.icon} ${s.label}</option>`).join('')
+    + `</select>`;
+}
+
 /* ── SUPABASE SYNC ── */
 const FB_KEY = 'md_reservations';
 
@@ -143,10 +161,16 @@ function renderDashboard() {
   const cancelled = all.filter(r => r.status === 'cancelled').length;
   const revenue   = all.filter(r => r.status === 'completed').reduce((s, r) => s + +r.total, 0);
   const clients   = new Set(all.map(r => r.phone)).size;
+  const webCount    = all.filter(r => r.source === 'web').length;
+  const manualCount = all.filter(r => r.source === 'manual').length;
+  const webPend     = all.filter(r => r.source === 'web' && r.status === 'pending').length;
+  const pctOf = n => total ? Math.round(n / total * 100) : 0;
 
   document.getElementById('dashKpi').innerHTML = `
     <div class="kpi c-red"><div class="kpi-icon">📋</div><div class="kpi-val">${total}</div><div class="kpi-label">Total réservations</div><div class="kpi-sub ${pending ? 'warn' : 'up'}">${pending ? pending + ' en attente' : 'Tout traité ✓'}</div></div>
     <div class="kpi c-green"><div class="kpi-icon">💰</div><div class="kpi-val" style="font-size:1.5rem">${fmtN(revenue)}</div><div class="kpi-label">Chiffre d'affaires (MAD)</div><div class="kpi-sub up">Hors annulations</div></div>
+    <div class="kpi c-blue"><div class="kpi-icon">🌐</div><div class="kpi-val" style="color:var(--blue)">${webCount}</div><div class="kpi-label">Réservations du site web</div><div class="kpi-sub ${webPend ? 'warn' : 'up'}">${webPend ? webPend + ' en attente · ' : ''}${pctOf(webCount)}% du total</div></div>
+    <div class="kpi c-purple"><div class="kpi-icon">📞</div><div class="kpi-val" style="color:var(--purple)">${manualCount}</div><div class="kpi-label">Réservations manuelles</div><div class="kpi-sub up">${pctOf(manualCount)}% du total</div></div>
     <div class="kpi c-blue"><div class="kpi-icon">👥</div><div class="kpi-val">${clients}</div><div class="kpi-label">Clients uniques</div><div class="kpi-sub up">Tous temps</div></div>
     <div class="kpi c-yellow"><div class="kpi-icon">⏳</div><div class="kpi-val" style="color:var(--yellow)">${pending}</div><div class="kpi-label">En attente</div><div class="kpi-sub ${pending ? 'warn' : 'up'}">${pending ? 'Action requise' : 'Aucune en attente ✓'}</div></div>
     <div class="kpi c-purple"><div class="kpi-icon">✅</div><div class="kpi-val" style="color:var(--green)">${confirmed}</div><div class="kpi-label">Confirmées</div><div class="kpi-sub up">${completed} terminée(s)</div></div>
@@ -159,7 +183,7 @@ function renderDashboard() {
       <div class="act-item" onclick="openDetail(${r.id})">
         <div class="act-avatar" style="background:${avatarColor(r.phone)}">${esc(init(r.name))}</div>
         <div class="act-info">
-          <div class="act-name">${esc(r.name)}</div>
+          <div class="act-name">${esc(r.name)} ${srcBadge(r)}</div>
           <div class="act-sub">🚗 ${esc(r.car)} · ${esc(r.city) || '—'}</div>
         </div>
         <div class="act-right">
@@ -337,7 +361,7 @@ function exportAllContacts() {
 }
 
 /* ── RESERVATIONS ── */
-let _resSearch = '', _resStatus = '';
+let _resSearch = '', _resStatus = '', _resSource = '';
 function renderReservations() {
   let data = getRes();
   if (_resSearch) {
@@ -348,12 +372,13 @@ function renderReservations() {
     );
   }
   if (_resStatus) data = data.filter(r => r.status === _resStatus);
+  if (_resSource) data = data.filter(r => r.source === _resSource);
   data = [...data].reverse();
 
   document.getElementById('resCount').textContent = data.length + ' réservation(s)';
   const tbody = document.getElementById('resBody');
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="crm-empty"><div class="crm-empty-icon">📭</div><div>Aucune réservation trouvée</div></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9"><div class="crm-empty"><div class="crm-empty-icon">📭</div><div>Aucune réservation trouvée</div></div></td></tr>`;
     return;
   }
   tbody.innerHTML = data.map(r => `
@@ -367,12 +392,11 @@ function renderReservations() {
       <td style="font-size:.78rem">${fmt(r.start)}<br><span style="color:var(--muted)">→ ${fmt(r.end)}</span></td>
       <td style="color:var(--muted)">${r.days}j</td>
       <td style="font-weight:700;color:var(--green)">${fmtN(r.total)} <span style="color:var(--muted);font-size:.7rem">MAD</span></td>
-      <td>${badge(r.status)}</td>
+      <td>${srcBadge(r)}</td>
+      <td>${statusSelect(r)}</td>
       <td><div class="acts">
         <button class="ab" onclick="openDetail(${r.id})" title="Détails">👁</button>
         <button class="ab wa" onclick="crmWA(${r.id})" title="WhatsApp">📲</button>
-        ${r.status === 'pending' ? `<button class="ab ok" onclick="changeStatus(${r.id},'confirmed')">✅</button>` : ''}
-        ${r.status !== 'cancelled' && r.status !== 'completed' ? `<button class="ab no" onclick="changeStatus(${r.id},'cancelled')">❌</button>` : ''}
         <button class="ab del" onclick="delRes(${r.id})" title="Supprimer">🗑</button>
       </div></td>
     </tr>
@@ -609,7 +633,8 @@ function openDetail(id) {
       <h3>📋 Réservation #${r.id}</h3>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div style="margin-bottom:14px">${badge(r.status)}</div>
+    <div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap">${badge(r.status)} ${srcBadge(r)}</div>
+    <div class="drow"><span class="dk">📥 Provenance</span><span class="dv">${srcInfo(r).icon} ${srcInfo(r).label}</span></div>
     <div class="drow"><span class="dk">👤 Client</span><span class="dv">${esc(r.name)}</span></div>
     <div class="drow"><span class="dk">📞 Téléphone</span><span class="dv">${esc(r.phone)}</span></div>
     ${r.email ? `<div class="drow"><span class="dk">✉️ Email</span><span class="dv">${esc(r.email)}</span></div>` : ''}
@@ -650,6 +675,7 @@ function openDetail(id) {
     <div class="modal-acts">
       <button class="crm-btn-sm" style="width:100%" onclick="openEditReservation(${r.id})">✏️ Modifier toute la réservation</button>
       ${r.status === 'pending' ? `<button class="mb confirm" onclick="changeStatus(${r.id},'confirmed');closeModal()">✅ Confirmer</button>` : ''}
+      ${r.status === 'confirmed' || r.status === 'payment_pending' ? `<button class="mb confirm" onclick="changeStatus(${r.id},'completed');closeModal()">🏁 Marquer terminé</button>` : ''}
       ${r.status !== 'cancelled' && r.status !== 'completed' ? `<button class="mb cancel" onclick="changeStatus(${r.id},'cancelled');closeModal()">❌ Annuler</button>` : ''}
       <button class="mb wa" onclick="crmWA(${r.id})">📲 WhatsApp</button>
       <button class="mb cancel" onclick="delRes(${r.id})">🗑️ Supprimer</button>
