@@ -1,0 +1,15 @@
+# ============================================================
+#  Chakroun Cars — politique de cache
+#  Code (HTML/JS/CSS) toujours revalidé => les mises à jour
+#  apparaissent immédiatement sur téléphone ET ordinateur.
+#  Les médias (images/polices) restent en cache => site léger.
+#  (Aucune règle de réécriture : ne change pas le routage.)
+# ============================================================
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|htm|js|css)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(png|jpe?g|gif|webp|svg|ico|woff2?|ttf|eot|mp4)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+</IfModule>
