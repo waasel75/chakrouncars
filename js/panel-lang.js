@@ -261,6 +261,58 @@ const _LANG_IDX = { en:0, es:1, ar:2 };
 const DYN = { en:{}, es:{}, ar:{} };
 for (const k in _TR) { DYN.en[k]=_TR[k][0]; DYN.es[k]=_TR[k][1]; DYN.ar[k]=_TR[k][2]; }
 
+// Compléments : écrans de connexion, sidebar admin-master, vue Conversations
+const _TR2 = {
+  "Dashboard":["Dashboard","Panel","لوحة التحكم"],
+  "Réservations site web":["Website bookings","Reservas del sitio web","حجوزات الموقع"],
+  "CRM System":["CRM System","Sistema CRM","نظام CRM"],
+  "Vue globale (Master)":["Global view (Master)","Vista global (Master)","العرض الشامل (ماستر)"],
+  "Vue globale":["Global view","Vista global","العرض الشامل"],
+  "Vue combinée (Master)":["Combined view (Master)","Vista combinada (Master)","العرض المدمج (ماستر)"],
+  "Voir le site":["View site","Ver el sitio","عرض الموقع"],
+  "Paramètres":["Settings","Ajustes","الإعدادات"],
+  "Déconnexion":["Log out","Cerrar sesión","تسجيل الخروج"],
+  "Toutes les dernières réservations":["All latest bookings","Todas las últimas reservas","كل آخر الحجوزات"],
+  "Dernières réservations":["Latest bookings","Últimas reservas","آخر الحجوزات"],
+  "Voir tout":["View all","Ver todo","عرض الكل"],
+  "Connexion":["Login","Iniciar sesión","تسجيل الدخول"],
+  "Connexion CRM":["CRM Login","Acceso CRM","دخول CRM"],
+  "Accès réservé aux administrateurs":["Administrators only","Solo administradores","مخصص للمشرفين فقط"],
+  "IDENTIFIANT":["USERNAME","USUARIO","المعرّف"],
+  "MOT DE PASSE":["PASSWORD","CONTRASEÑA","كلمة المرور"],
+  "Identifiant":["Username","Usuario","المعرّف"],
+  "Mot de passe":["Password","Contraseña","كلمة المرور"],
+  "Se connecter":["Log in","Conectarse","دخول"],
+  "Accéder au CRM":["Access CRM","Acceder al CRM","الدخول إلى CRM"],
+  "Mot de passe oublié":["Forgot password","Contraseña olvidada","نسيت كلمة المرور"],
+  "Retour au site":["Back to site","Volver al sitio","العودة إلى الموقع"],
+  "Retour au panneau admin":["Back to admin panel","Volver al panel admin","العودة إلى لوحة الأدمين"],
+  "Votre identifiant":["Your username","Tu usuario","المعرّف ديالك"],
+  "Vider":["Clear","Vaciar","إفراغ"],
+  "Conversations Chatbot":["Chatbot conversations","Conversaciones del chatbot","محادثات الشات بوت"],
+  "Conversations":["Conversations","Conversaciones","المحادثات"],
+  "Bot":["Bot","Bot","بوت"],
+  "Vous":["You","Tú","أنت"],
+  "Vider toutes les conversations":["Clear all conversations","Vaciar todas las conversaciones","إفراغ كل المحادثات"],
+  "Réservation manuelle":["Manual booking","Reserva manual","حجز يدوي"],
+  "Nouvelle réservation manuelle":["New manual booking","Nueva reserva manual","حجز يدوي جديد"],
+  "Ajouter un véhicule":["Add a vehicle","Añadir un vehículo","إضافة سيارة"],
+  "Rechercher":["Search","Buscar","بحث"],
+  "Exporter tous les contacts":["Export all contacts","Exportar todos los contactos","تصدير كل جهات الاتصال"],
+  "Tous les statuts":["All statuses","Todos los estados","كل الحالات"],
+  "Toutes provenances":["All sources","Todos los orígenes","كل المصادر"],
+  "Enregistrer":["Save","Guardar","حفظ"],
+  "Modifier":["Edit","Editar","تعديل"],
+  "Détails":["Details","Detalles","تفاصيل"],
+  "Calendrier":["Calendar","Calendario","التقويم"],
+  "Réserver":["Book","Reservar","حجز"],
+  "Bloquer la période":["Block the period","Bloquear el período","حظر الفترة"],
+  "Bloquer période":["Block period","Bloquear período","حظر الفترة"],
+  "Disponibilité & Blocage":["Availability & Blocking","Disponibilidad y Bloqueo","التوفر والحجب"],
+  "Aujourd'hui":["Today","Hoy","اليوم"],
+};
+for (const k in _TR2) { DYN.en[k]=_TR2[k][0]; DYN.es[k]=_TR2[k][1]; DYN.ar[k]=_TR2[k][2]; }
+
 const DYN_RULES = {
   en: [
     [/^(\d+) en attente · (\d+)% du total$/, '$1 pending · $2% of total'],
@@ -314,8 +366,33 @@ const DYN_RULES = {
     [/^dépassée de (\d+) km$/, 'متأخر بـ $1 كم'],
   ],
 };
+// Règles complémentaires (conversations chatbot, compteurs)
+DYN_RULES.en.push(
+  [/^Session #(\d+) · démarrée le (.+)$/, 'Session #$1 · started on $2'],
+  [/^Session (\d+)$/, 'Session $1'],
+  [/^(\d+) msgs$/, '$1 msgs'],
+  [/^(\d+) message\(s\)$/, '$1 message(s)'],
+  [/^(\d+) conversation\(s\)$/, '$1 conversation(s)'],
+);
+DYN_RULES.es.push(
+  [/^Session #(\d+) · démarrée le (.+)$/, 'Sesión #$1 · iniciada el $2'],
+  [/^Session (\d+)$/, 'Sesión $1'],
+  [/^(\d+) msgs$/, '$1 msgs'],
+  [/^(\d+) message\(s\)$/, '$1 mensaje(s)'],
+  [/^(\d+) conversation\(s\)$/, '$1 conversación(es)'],
+);
+DYN_RULES.ar.push(
+  [/^Session #(\d+) · démarrée le (.+)$/, 'الجلسة #$1 · بدأت في $2'],
+  [/^Session (\d+)$/, 'الجلسة $1'],
+  [/^(\d+) msgs$/, '$1 رسالة'],
+  [/^(\d+) message\(s\)$/, '$1 رسالة'],
+  [/^(\d+) conversation\(s\)$/, '$1 محادثة'],
+);
 
-const _EMOJI_PREFIX = /^([\p{Extended_Pictographic}️‍←-⇿⌀-➿\s]+)([\s\S]+)$/u;
+// Retire les symboles/emojis/flèches/✓/? en tête et en fin, pour traduire le
+// cœur textuel (ex: "🟢 Disponibles", "→ Se connecter", "Retour au site ←",
+// "Mot de passe oublié ?", "Tout traité ✓").
+const _AFFIX = /^[\s\p{Extended_Pictographic}️‍←-⇿☀-➿✓?⚠·•]+|[\s\p{Extended_Pictographic}️‍←-⇿☀-➿✓?⚠·•]+$/gu;
 
 function _lookup(txt, lang) {
   const dict = DYN[lang]; if (!dict) return null;
@@ -327,9 +404,8 @@ function _lookup(txt, lang) {
 function _translatePhrase(txt, lang) {
   let out = _lookup(txt, lang);
   if (out != null) return out;
-  // Réessayer sans le préfixe emoji (ex: "🟢 Disponibles" → "Disponibles")
-  const m = txt.match(_EMOJI_PREFIX);
-  if (m) { const inner = _lookup(m[2], lang); if (inner != null) return m[1] + inner; }
+  const core = txt.replace(_AFFIX, '').trim();
+  if (core && core !== txt.trim()) { const t = _lookup(core, lang); if (t != null) return txt.replace(core, t); }
   return null;
 }
 
@@ -377,7 +453,7 @@ function translateDynamic(root) {
 let _dynObs = null;
 function setupDynObserver() {
   if (_dynObs) return;
-  const targets = [document.getElementById('crmApp'), document.getElementById('app')].filter(Boolean);
+  const targets = [document.getElementById('crmApp'), document.getElementById('app'), document.getElementById('sPanel'), document.body].filter(Boolean);
   if (!targets.length) return;
   _dynObs = new MutationObserver(() => {
     if (_translating || curLang() === 'fr') return;
