@@ -73,10 +73,7 @@
       <option value="es">🇪🇸 Español</option><option value="ar">🇲🇦 العربية</option>
     </select>
     <nav class="s-nav">
-      <button class="s-nav-btn active" onclick="sTab('reservations',this)">
-        <span class="s-nav-icon">📅</span> <span data-pt="nav-res">Réservations</span>
-      </button>
-      <button class="s-nav-btn" onclick="sTab('chatbot',this)">
+      <button class="s-nav-btn active" onclick="sTab('chatbot',this)">
         <span class="s-nav-icon">🤖</span> <span data-pt="nav-chatbot">Chatbot</span>
       </button>
       <button class="s-nav-btn" onclick="sTab('offers',this)">
@@ -99,44 +96,8 @@
   <!-- Content -->
   <main class="s-main">
 
-    <!-- TAB: RESERVATIONS -->
-    <div class="s-tab" id="tabReservations">
-      <div class="s-page-header">
-        <h1 data-pt="h-res-t">Gestion des réservations</h1>
-        <p data-pt="h-res-s">Bloquez ou libérez des dates pour chaque véhicule</p>
-      </div>
-
-      <div class="s-res-controls">
-        <select id="sResCar" class="s-select" onchange="renderResCalendar()">
-          <option value="">-- Choisir un véhicule --</option>
-        </select>
-        <div class="s-block-form" id="sBlockForm" style="display:none">
-          <input type="date" id="sBlockStart" class="s-input"/>
-          <input type="date" id="sBlockEnd" class="s-input"/>
-          <button class="s-btn-red" onclick="addBlock()">Bloquer période</button>
-        </div>
-      </div>
-
-      <div id="sResContent" style="display:none">
-        <div class="s-cal-nav">
-          <button onclick="resCalNav(-1)">‹</button>
-          <span id="sResMonthLabel"></span>
-          <button onclick="resCalNav(1)">›</button>
-        </div>
-        <div class="s-cal-legend">
-          <span class="sl-item"><span class="sl-dot sl-avail"></span>Disponible</span>
-          <span class="sl-item"><span class="sl-dot sl-reserved"></span>Réservé (client)</span>
-          <span class="sl-item"><span class="sl-dot sl-blocked"></span>Bloqué (manuel)</span>
-        </div>
-        <div class="s-cal-wrap">
-          <div class="s-cal-grid" id="sResGrid"></div>
-        </div>
-        <div class="s-blocks-list" id="sBlocksList"></div>
-      </div>
-    </div>
-
     <!-- TAB: CHATBOT -->
-    <div class="s-tab" id="tabChatbot" style="display:none">
+    <div class="s-tab" id="tabChatbot">
       <div class="s-page-header">
         <h1 data-pt="h-cb-t">🤖 Paramètres Chatbot</h1>
         <p data-pt="h-cb-s">Configurez et contrôlez le chatbot de votre site</p>

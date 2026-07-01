@@ -119,6 +119,7 @@ function renderCurrent() {
   else if (_currentSection === 'clients') renderClients();
   else if (_currentSection === 'reservations') renderReservations();
   else if (_currentSection === 'vehicles') renderVehicles();
+  else if (_currentSection === 'availability') renderAvailability();
   else if (_currentSection === 'vidange') renderVidange();
   else if (_currentSection === 'stats') renderStats();
 }
@@ -131,7 +132,7 @@ function navigate(section) {
   document.querySelectorAll('.crm-section').forEach(el => {
     el.classList.toggle('active', el.id === 'sec-' + section);
   });
-  const titles = { dashboard:'Tableau de bord', clients:'Clients', reservations:'Réservations', vehicles:'Véhicules', vidange:'Vidange', stats:'Statistiques' };
+  const titles = { dashboard:'Tableau de bord', clients:'Clients', reservations:'Réservations', vehicles:'Véhicules', availability:'Disponibilité', vidange:'Vidange', stats:'Statistiques' };
   document.getElementById('topbarTitle').textContent = titles[section] || '';
   renderCurrent();
 }
@@ -1104,6 +1105,101 @@ function openVehicleCalendar(id, year, month) {
     </div>
     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">${cells}</div>`;
   document.getElementById('crmOverlay').classList.add('open');
+}
+
+/* ── DISPONIBILITÉ / BLOCAGE DE DATES ──
+   Section dédiée (déplacée depuis l'ancien panneau Paramètres). On bloque
+   n'importe quelle date pour n'importe quel véhicule. Les blocages sont stockés
+   dans `md_blocks` — la même clé lue par le site web (isCarAvailable) et
+   synchronisée vers Supabase par db.js → tout changement s'applique partout. */
+let _avYear = null, _avMonth = null;
+
+function renderAvailability() {
+  const sel = document.getElementById('avCar');
+  if (!sel) return;
+  const cur = sel.value;
+  const vehicles = getVehicles().filter(v => v.status !== 'accident' && v.status !== 'maintenance');
+  sel.innerHTML = '<option value="">— Choisir un véhicule —</option>' +
+    vehicles.map(v => `<option value="${esc(v.name)}" ${v.name === cur ? 'selected' : ''}>${esc(v.name)}${v.plate ? ' (' + esc(v.plate) + ')' : ''}</option>`).join('');
+  const car = sel.value;
+  document.getElementById('avContent').style.display = car ? 'block' : 'none';
+  if (!car) return;
+  if (_avYear === null) { const now = new Date(); _avYear = now.getFullYear(); _avMonth = now.getMonth(); }
+  drawBlockCal();
+}
+function blockCalNav(dir) {
+  _avMonth += dir;
+  if (_avMonth > 11) { _avMonth = 0; _avYear++; }
+  if (_avMonth < 0)  { _avMonth = 11; _avYear--; }
+  drawBlockCal();
+}
+function crmGetBlocks(car) { return (JSON.parse(localStorage.getItem('md_blocks') || '{}')[car]) || []; }
+function crmReservedDates(car) {
+  const set = new Set();
+  getRes().filter(r => r.car === car && r.status !== 'cancelled' && r.start && r.end).forEach(r => {
+    for (let d = new Date(r.start); d < new Date(r.end); d.setDate(d.getDate() + 1)) set.add(d.toISOString().slice(0, 10));
+  });
+  return set;
+}
+function crmBlockedDates(car) {
+  const set = new Set();
+  crmGetBlocks(car).forEach(b => {
+    for (let d = new Date(b.start); d <= new Date(b.end); d.setDate(d.getDate() + 1)) set.add(d.toISOString().slice(0, 10));
+  });
+  return set;
+}
+function drawBlockCal() {
+  const car = document.getElementById('avCar').value;
+  const today = new Date().toISOString().slice(0, 10);
+  const reserved = crmReservedDates(car), blocked = crmBlockedDates(car);
+  document.getElementById('avMonthLabel').textContent = `${MONTHS_FR[_avMonth]} ${_avYear}`;
+  const first = new Date(_avYear, _avMonth, 1);
+  const offset = (first.getDay() + 6) % 7;
+  const total = new Date(_avYear, _avMonth + 1, 0).getDate();
+  let cells = '';
+  for (let i = 0; i < offset; i++) cells += '<div></div>';
+  for (let d = 1; d <= total; d++) {
+    const ds = `${_avYear}-${String(_avMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    let bg = 'rgba(46,204,113,.25)';
+    if (reserved.has(ds)) bg = 'rgba(230,57,70,.35)';
+    else if (blocked.has(ds)) bg = 'rgba(244,162,97,.5)';
+    const border = ds === today ? '2px solid var(--yellow)' : '1px solid transparent';
+    cells += `<div style="background:${bg};border:${border};border-radius:8px;padding:10px 0;text-align:center;font-weight:600;font-size:.85rem">${d}</div>`;
+  }
+  document.getElementById('avGrid').innerHTML = cells;
+  renderCrmBlocksList(car);
+}
+function addCrmBlock() {
+  const car = document.getElementById('avCar').value;
+  const start = document.getElementById('avStart').value, end = document.getElementById('avEnd').value;
+  if (!car || !start || !end) { toast('⚠️ Choisissez un véhicule et des dates'); return; }
+  if (end < start) { toast('⚠️ Date de fin invalide'); return; }
+  const all = JSON.parse(localStorage.getItem('md_blocks') || '{}');
+  if (!all[car]) all[car] = [];
+  all[car].push({ id: Date.now(), start, end });
+  localStorage.setItem('md_blocks', JSON.stringify(all)); // db.js → Supabase → site web
+  document.getElementById('avStart').value = '';
+  document.getElementById('avEnd').value = '';
+  drawBlockCal();
+  toast('✅ Période bloquée');
+}
+function removeCrmBlock(car, id) {
+  const all = JSON.parse(localStorage.getItem('md_blocks') || '{}');
+  if (all[car]) all[car] = all[car].filter(b => b.id !== id);
+  localStorage.setItem('md_blocks', JSON.stringify(all));
+  drawBlockCal();
+  toast('🗑️ Blocage retiré');
+}
+function renderCrmBlocksList(car) {
+  const blocks = crmGetBlocks(car);
+  const el = document.getElementById('avBlocksList');
+  el.innerHTML = blocks.length
+    ? `<div style="font-weight:600;font-size:.85rem;margin-bottom:8px">Périodes bloquées :</div>` +
+      blocks.map(b => `<div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 12px;margin-bottom:6px">
+        <span style="font-size:.82rem">📅 ${fmt(b.start)} → ${fmt(b.end)}</span>
+        <button class="crm-btn-sm" onclick="removeCrmBlock('${esc(car).replace(/'/g,"\\'")}',${b.id})">🗑</button>
+      </div>`).join('')
+    : '<div style="color:var(--muted);font-size:.82rem">Aucune période bloquée.</div>';
 }
 
 /* ── VIDANGE ── */

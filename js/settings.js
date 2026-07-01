@@ -108,10 +108,9 @@ function sTab(name, btn) {
 /* ===== INIT ===== */
 function init() {
   renderCarsGrid();
-  renderResCarSelect();
   loadSiteSettings();
   loadBookingConfig();
-  initBlockDatePickers();
+  initChatbotTab(); // onglet Chatbot = onglet par défaut
   const agencyName = (JSON.parse(localStorage.getItem('md_site_settings') || '{}').name) || 'Chakroun Cars';
   if (document.title.includes('Chakroun Cars')) document.title = document.title.replace(/Chakroun Cars/g, agencyName);
 }
