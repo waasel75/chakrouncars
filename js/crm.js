@@ -1010,12 +1010,33 @@ function openVehicleModal(id) {
     <button class="crm-btn" style="width:100%" onclick="saveVehicle(${v?v.id:'null'})">💾 Enregistrer</button>`;
   document.getElementById('crmOverlay').classList.add('open');
 }
+// Compression obligatoire : une photo brute en base64 (~7MB) dépasse le quota
+// localStorage (5MB) et fait échouer silencieusement l'enregistrement.
+function compressVehicleImage(dataUrl, cb) {
+  const img = new Image();
+  img.onload = () => {
+    const MAX = 1000;
+    const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * scale);
+    c.height = Math.round(img.height * scale);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    cb(c.toDataURL('image/jpeg', 0.72));
+  };
+  img.onerror = () => cb(dataUrl);
+  img.src = dataUrl;
+}
 function onVehicleImagesChange(e) {
   const files = Array.from(e.target.files||[]);
   let remaining = files.length; if (!remaining) return;
   files.forEach(f=>{
     const reader = new FileReader();
-    reader.onload = ev => { window._vehImagesTemp.push(ev.target.result); if (--remaining===0) renderVehImgPreview(); };
+    reader.onload = ev => {
+      compressVehicleImage(ev.target.result, compressed => {
+        window._vehImagesTemp.push(compressed);
+        if (--remaining===0) renderVehImgPreview();
+      });
+    };
     reader.readAsDataURL(f);
   });
 }
@@ -1034,8 +1055,15 @@ function saveVehicle(id) {
   data.images = window._vehImagesTemp || [];
   if (!data.name) { toast('⚠️ Nom du véhicule requis'); return; }
   const list = getVehicles();
-  if (id) saveVehicles(list.map(v=>v.id===id?{...v,...data}:v));
-  else { list.unshift({ id: Date.now(), ...data }); saveVehicles(list); }
+  try {
+    if (id) saveVehicles(list.map(v=>v.id===id?{...v,...data}:v));
+    else { list.unshift({ id: Date.now(), ...data }); saveVehicles(list); }
+  } catch (err) {
+    // QuotaExceededError : stockage plein (photos trop lourdes)
+    toast('❌ Stockage plein — supprimez des photos ou réduisez leur taille');
+    console.error('saveVehicle failed:', err);
+    return;
+  }
   closeModal(); renderVehicles(); checkVidangeAlerts(); checkEcheanceAlerts();
   toast('✅ Véhicule enregistré');
 }
